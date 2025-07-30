@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hyprlnk - Link management, reimagined</title>
+    <meta name="description" content="AI-powered bookmark management with intelligent organization and session recovery">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        .card-interactive {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .card-interactive:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        .card-interactive:hover .icon-bg {
+            transform: scale(1.1);
+        }
+        
+        /* Bookmarks theme - Blue */
+        .card-bookmarks:hover {
+            border-color: #3b82f6;
+        }
+        .card-bookmarks:hover .icon-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .card-bookmarks:hover .icon-bg i {
+            color: white;
+        }
+        
+        /* Sessions theme - Purple */
+        .card-sessions:hover {
+            border-color: #8b5cf6;
+        }
+        .card-sessions:hover .icon-bg {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        .card-sessions:hover .icon-bg i {
+            color: white;
+        }
+        
+        /* Collections theme - Green */
+        .card-collections:hover {
+            border-color: #10b981;
+        }
+        .card-collections:hover .icon-bg {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .card-collections:hover .icon-bg i {
+            color: white;
+        }
+        
+        /* Recent theme - Today (Orange) */
+        .card-recent:hover {
+            border-color: #f97316;
+        }
+        .card-recent:hover .icon-bg {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+        .card-recent:hover .icon-bg i {
+            color: white;
+        }
+        .icon-bg {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-number {
+            transition: color 0.3s ease;
+        }
+        .content-section {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen font-sans antialiased" x-data="hyprlink()" x-init="init()">
+    <!-- Navigation Header -->
+    <nav class="sticky top-0 z-50 bg-white/75 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-bookmark text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">hyprlnk</h1>
+                        <p class="text-xs text-gray-500 -mt-0.5 hidden sm:block">Link management, reimagined</p>
+                    </div>
+                </div>
+                
+                <div class="hidden sm:flex items-center space-x-4">
+                    <!-- Extension Status -->
+                    <div x-show="extensionInstalled" 
+                         class="flex items-center space-x-2 px-3 py-1.5 bg-green-50 rounded-full">
+                        <i class="fas fa-puzzle-piece text-green-600 text-xs"></i>
+                        <span class="text-sm font-medium text-green-700">Extension Active</span>
+                    </div>
+                    
+                    <div x-show="!extensionInstalled" 
+                         @click="showExtensionModal = true"
+                         class="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full cursor-pointer transition-colors">
+                        <i class="fas fa-puzzle-piece text-gray-500 text-xs"></i>
+                        <span class="text-sm font-medium text-gray-600">Get Extension</span>
+                    </div>
+                    
+                    <div class="w-px h-6 bg-gray-300"></div>
+                    
+                    <div class="flex items-center space-x-2 px-3 py-1.5 bg-brand-50 rounded-full">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-medium text-brand-700" x-text="`${bookmarks.length} saved`"></span>
+                    </div>
+                    
+                    <button @click="showImportModal = true" 
+                            class="px-4 py-2 text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200">
+                        <i class="fas fa-download mr-2"></i>Import
+                    </button>
+                    
+                    <button @click="showAddModal = true" 
+                            class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg transition-all duration-200 font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add
+                    </button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="sm:hidden">
+                    <button @click="showAddModal = true" 
+                            class="p-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <!-- Hero Stats -->
+        <div class="py-8 sm:py-12">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="card-interactive card-bookmarks bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('bookmarks')">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 mb-1">Bookmarks</p>
+                            <p class="text-3xl font-bold text-gray-900 card-number" x-text="bookmarks.length"></p>
+                        </div>
+                        <div class="icon-bg w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-bookmark text-xl text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-interactive card-sessions bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('sessions')">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 mb-1">Sessions</p>
+                            <p class="text-3xl font-bold text-gray-900 card-number" x-text="sessions.length"></p>
+                        </div>
+                        <div class="icon-bg w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center" style="background-color: #e9d5ff !important;">
+                            <i class="fas fa-layer-group text-xl text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-interactive card-collections bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('collections')">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 mb-1">Collections</p>
+                            <p class="text-3xl font-bold text-gray-900 card-number" x-text="allTags.length"></p>
+                        </div>
+                        <div class="icon-bg w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-folder-open text-xl text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-interactive card-recent bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('recent')">
+                    <div class="flex items-center">
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-600 mb-1">Today</p>
+                            <p class="text-3xl font-bold text-gray-900 card-number" x-text="todayCount"></p>
+                        </div>
+                        <div class="icon-bg w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-sun text-xl text-orange-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Content - Only shown on main dashboard -->
+        <div x-show="currentView === 'all'">
+            <!-- Welcome Section -->
+            <div class="mb-8">
+                <div class="bg-gradient-to-r from-brand-500 to-purple-600 rounded-3xl p-8 text-white">
+                    <div class="max-w-4xl">
+                        <h2 class="text-3xl font-bold mb-4">Welcome to Hyprlink</h2>
+                        <p class="text-xl opacity-90 mb-6">Your intelligent bookmark and session manager</p>
+                        <div class="flex flex-wrap gap-4">
+                            <button @click="showAddModal = true" 
+                                    class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
+                                <i class="fas fa-plus mr-2"></i>Add Bookmark
+                            </button>
+                            <button @click="showImportModal = true" 
+                                    class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
+                                <i class="fas fa-download mr-2"></i>Import Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Grid -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- Recent Bookmarks -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-bookmark text-blue-600 text-sm"></i>
+                            </div>
+                            Recent Bookmarks
+                        </h3>
+                        <button @click="setView('bookmarks')" 
+                                class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            View all →
+                        </button>
+                    </div>
+                    
+                    <div x-show="bookmarks.length === 0" class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-bookmark text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">No bookmarks yet</p>
+                        <button @click="showAddModal = true" 
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Add your first bookmark
+                        </button>
+                    </div>
+                    
+                    <div x-show="bookmarks.length > 0" class="space-y-3">
+                        <template x-for="bookmark in bookmarks.slice(0, 5)" :key="bookmark.id">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors group">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+                                    <i class="fas fa-globe text-blue-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium text-gray-900 truncate text-sm" x-text="bookmark.title"></h4>
+                                    <p class="text-xs text-gray-500 truncate" x-text="bookmark.url"></p>
+                                </div>
+                                <a :href="bookmark.url" target="_blank" 
+                                   class="p-2 text-gray-400 hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100">
+                                    <i class="fas fa-external-link-alt text-xs"></i>
+                                </a>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Recent Sessions -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3" style="background-color: #e9d5ff !important;">
+                                <i class="fas fa-layer-group text-purple-600 text-sm"></i>
+                            </div>
+                            Recent Sessions
+                        </h3>
+                        <button @click="setView('sessions')" 
+                                class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                            View all →
+                        </button>
+                    </div>
+                    
+                    <div x-show="sessions.length === 0" class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-layer-group text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">No sessions saved yet</p>
+                        <p class="text-sm text-gray-500 mb-4" x-show="!extensionInstalled">Install the browser extension to save sessions</p>
+                        <button x-show="extensionInstalled" 
+                                @click="saveCurrentSession()" 
+                                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors">
+                            Save your first session
+                        </button>
+                    </div>
+                    
+                    <div x-show="sessions.length > 0" class="space-y-3">
+                        <!-- Quick Save Button when extension is installed -->
+                        <div x-show="extensionInstalled" 
+                             @click="saveCurrentSession()"
+                             class="flex items-center space-x-3 p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors cursor-pointer group">
+                            <div class="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-purple-300 transition-colors">
+                                <i class="fas fa-plus text-purple-700 text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-purple-700 text-sm">Save Current Session</h4>
+                                <p class="text-xs text-purple-600">Quick save all open tabs</p>
+                            </div>
+                        </div>
+                        
+                        <template x-for="session in sessions.slice(0, 3)" :key="session.id">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-purple-50 transition-colors group">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors" style="background-color: #e9d5ff !important;">
+                                    <i class="fas fa-layer-group text-purple-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium text-gray-900 truncate text-sm" x-text="session.name"></h4>
+                                    <p class="text-xs text-gray-500" x-text="`${session.tabs.length} tabs • ${formatDate(session.created_at)}`"></p>
+                                </div>
+                                <button @click="restoreSession(session)" 
+                                        class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-medium transition-colors opacity-0 group-hover:opacity-100">
+                                    Restore
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Collections & Today's Activity -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- Popular Collections -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-folder-open text-green-600 text-sm"></i>
+                            </div>
+                            Top Collections
+                        </h3>
+                        <button @click="setView('collections')" 
+                                class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            View all →
+                        </button>
+                    </div>
+                    
+                    <div x-show="allTags.length === 0" class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-folder-open text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">No collections yet</p>
+                        <p class="text-sm text-gray-500">Collections are created when you tag bookmarks</p>
+                    </div>
+                    
+                    <div x-show="allTags.length > 0" class="space-y-3">
+                        <template x-for="tag in allTags.slice(0, 5)" :key="tag">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-orange-50 transition-colors group cursor-pointer"
+                                 @click="selectedTag = tag; setView('bookmarks')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                                        <i class="fas fa-folder text-green-600 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 text-sm capitalize" x-text="tag"></h4>
+                                        <p class="text-xs text-gray-500" x-text="`${getBookmarksByTag(tag).length} items`"></p>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Today's Activity -->
+                <div class="bg-white rounded-2xl p-6 border-2 border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-sun text-orange-600 text-sm"></i>
+                            </div>
+                            Today's Activity
+                        </h3>
+                        <button @click="setView('recent')" 
+                                class="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                            View all →
+                        </button>
+                    </div>
+                    
+                    <div x-show="todaysHistory.length === 0" class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-history text-2xl text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">No activity today</p>
+                        <p class="text-sm text-gray-500">Your browsing history will appear here</p>
+                    </div>
+                    
+                    <div x-show="todaysHistory.length > 0" class="space-y-3">
+                        <template x-for="entry in todaysHistory.slice(0, 5)" :key="entry.url">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl hover:bg-orange-50 transition-colors group">
+                                <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                                    <i class="fas fa-globe text-orange-600 text-xs"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-medium text-gray-900 truncate text-sm" x-text="entry.title"></h4>
+                                    <p class="text-xs text-gray-500" x-text="`${entry.visit_count} visits • ${new Date(entry.last_visit_time).toLocaleTimeString()}`"></p>
+                                </div>
+                                <button @click="createBookmarkFromHistory(entry)" 
+                                        class="p-2 text-gray-400 hover:text-orange-600 transition-colors opacity-0 group-hover:opacity-100">
+                                    <i class="fas fa-bookmark text-xs"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Getting Started Section (for new users) -->
+            <div x-show="bookmarks.length === 0 && sessions.length === 0" class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl p-8 border-2 border-gray-100">
+                <div class="max-w-4xl mx-auto text-center">
+                    <div class="w-20 h-20 bg-gradient-to-br from-brand-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-rocket text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Get Started with Hyprlink</h3>
+                    <p class="text-gray-600 mb-8 max-w-2xl mx-auto">Transform your browsing experience with intelligent bookmark management and session recovery</p>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-bookmark text-blue-600 text-lg"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Save Bookmarks</h4>
+                            <p class="text-sm text-gray-600 mb-4">Organize your favorite links with smart tagging and collections</p>
+                            <button @click="showAddModal = true" 
+                                    class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                Add Bookmark
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background-color: #e9d5ff !important;">
+                                <i class="fas fa-layer-group text-purple-600 text-lg"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Manage Sessions</h4>
+                            <p class="text-sm text-gray-600 mb-4">Save and restore your browsing sessions across devices</p>
+                            <button class="w-full px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
+                                Install Extension
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-download text-orange-600 text-lg"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Import Data</h4>
+                            <p class="text-sm text-gray-600 mb-4">Bring your existing bookmarks from other browsers</p>
+                            <button @click="showImportModal = true" 
+                                    class="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                Import Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Search Section -->
+        <div class="mb-8" x-show="currentView !== 'all'">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center">
+                    <div class="flex-1 flex items-center">
+                        <div class="flex items-center pl-5 pr-3 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input type="text" 
+                               x-model="globalSearchQuery"
+                               @input="performGlobalSearch()"
+                               :placeholder="getSearchPlaceholder()"
+                               class="flex-1 py-4 pr-3 bg-transparent border-none focus:outline-none placeholder-gray-400 text-gray-900">
+                        <!-- Clear button -->
+                        <button x-show="globalSearchQuery" 
+                                @click="globalSearchQuery = ''; performGlobalSearch()"
+                                class="px-3 py-2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="flex items-center border-l border-gray-200" x-show="currentView === 'bookmarks'">
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" 
+                                    @click.away="open = false"
+                                    class="flex items-center gap-2 px-4 py-2 bg-transparent hover:bg-gray-50 focus:outline-none text-gray-700 text-sm cursor-pointer transition-colors">
+                                <span x-text="selectedTag || 'All Collections'"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                <button @click="selectedTag = ''; filterContent(); open = false" 
+                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        :class="!selectedTag && 'font-medium bg-gray-50'">
+                                    All Collections
+                                </button>
+                                <template x-for="tag in allTags" :key="tag">
+                                    <button @click="selectedTag = tag; filterContent(); open = false" 
+                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                            :class="selectedTag === tag && 'font-medium bg-gray-50'"
+                                            x-text="tag">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sort -->
+                    <div class="flex items-center border-l border-gray-200">
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" 
+                                    @click.away="open = false"
+                                    class="flex items-center gap-2 px-4 py-2 bg-transparent hover:bg-gray-50 focus:outline-none text-gray-700 text-sm cursor-pointer transition-colors">
+                                <span x-text="getSortOptions().find(o => o.value === globalSortBy)?.label || 'Sort'"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                <template x-for="option in getSortOptions()" :key="option.value">
+                                    <button @click="globalSortBy = option.value; sortContent(); open = false" 
+                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                            :class="globalSortBy === option.value && 'font-medium bg-gray-50'"
+                                            x-text="option.label">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Navigation -->
+        <div class="mb-6" x-show="currentView !== 'all'">
+            <div class="flex items-center justify-between">
+                <button @click="setView('all')" 
+                        class="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Overview
+                </button>
+                <div class="flex items-center space-x-2 px-4 py-2 rounded-lg" :class="getViewBadgeClasses()">
+                    <div class="w-2 h-2 rounded-full" :class="getViewDotClasses()"></div>
+                    <span class="text-sm font-medium" :class="getViewTextClasses()" x-text="getViewTitle()"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Section -->
+        <div class="content-section mb-8" x-show="currentView === 'sessions'">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Your Sessions</h2>
+                <div class="text-sm text-gray-500">
+                    <span x-text="filteredSessions.length"></span> of <span x-text="sessions.length"></span> sessions
+                    <span x-show="sessionSearchQuery || sessionDateFilter" class="ml-2">(filtered)</span>
+                </div>
+            </div>
+            
+            
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <template x-for="session in filteredSessions" :key="session.id">
+                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 hover:bg-gradient-to-br hover:from-purple-50 hover:to-white transition-all duration-200 group">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 text-lg mb-2" x-text="session.name"></h3>
+                                <p class="text-sm text-gray-600 mb-3" x-text="session.description"></p>
+                                <div class="flex items-center text-xs text-gray-500 mb-4">
+                                    <i class="fas fa-calendar mr-2"></i>
+                                    <span x-text="formatDate(session.created_at)"></span>
+                                    <span class="mx-2">•</span>
+                                    <span x-text="session.tabs.length + ' tabs'"></span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button @click="restoreSession(session)" 
+                                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg font-medium transition-colors">
+                                    <i class="fas fa-external-link-alt mr-2"></i>Restore
+                                </button>
+                                <button @click="deleteSession(session.id)" 
+                                        class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabs Preview -->
+                        <div class="border-t border-gray-100 pt-4">
+                            <div class="flex items-center mb-3">
+                                <h4 class="font-medium text-gray-700 text-sm">Tabs in this session:</h4>
+                                <button @click="session.showAllTabs = !session.showAllTabs" 
+                                        class="ml-2 text-purple-600 hover:text-purple-700 text-sm">
+                                    <span x-text="session.showAllTabs ? 'Show less' : `Show all ${session.tabs.length}`"></span>
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <template x-for="(tab, index) in (session.showAllTabs ? session.tabs : session.tabs.slice(0, 5))" :key="index">
+                                    <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-4 h-4 bg-gray-300 rounded-sm flex items-center justify-center">
+                                                <i class="fas fa-globe text-xs text-gray-600"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate" x-text="tab.title || 'Untitled'"></p>
+                                            <p class="text-xs text-gray-500 truncate" x-text="tab.url || 'No URL'"></p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <a :href="tab.url" target="_blank" 
+                                               class="p-1 text-gray-400 hover:text-purple-600 transition-colors">
+                                                <i class="fas fa-external-link-alt text-xs"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <div x-show="!session.showAllTabs && session.tabs.length > 5" 
+                                     class="text-center py-2">
+                                    <button @click="session.showAllTabs = true" 
+                                            class="text-sm text-purple-600 hover:text-purple-700">
+                                        Show <span x-text="session.tabs.length - 5"></span> more tabs...
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Today's History Section -->
+        <div class="content-section mb-6" x-show="currentView === 'recent'">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Today's Visited Links</h2>
+                <div class="text-sm text-gray-500" x-show="todaysHistory.length > 0">
+                    <span x-text="todaysHistory.length"></span> links visited today
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-6">
+                    <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Loading today's history</h3>
+                <p class="text-gray-600">Fetching your browsing activity...</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="!loading && todaysHistory.length === 0" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-8">
+                    <i class="fas fa-history text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No activity today</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">Start browsing and your visited links will appear here automatically.</p>
+            </div>
+            
+            <!-- History Grid -->
+            <div x-show="!loading && (filteredHistory.length > 0 || todaysHistory.length > 0)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="entry in (filteredHistory.length > 0 ? filteredHistory : todaysHistory)" :key="entry.url">
+                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white transition-all duration-200">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-900 mb-2 truncate" x-text="entry.title"></h3>
+                                <p class="text-sm text-blue-600 break-all mb-2" x-text="entry.url"></p>
+                                <div class="flex items-center text-xs text-gray-500 space-x-4">
+                                    <span>
+                                        <i class="fas fa-eye mr-1"></i>
+                                        <span x-text="entry.visit_count"></span> visits
+                                    </span>
+                                    <span x-text="new Date(entry.last_visit_time).toLocaleTimeString()"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <a :href="entry.url" target="_blank" 
+                                   class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-xs font-medium transition-colors">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Visit
+                                </a>
+                                <button @click="createBookmarkFromHistory(entry)"
+                                        class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-colors">
+                                    <i class="fas fa-bookmark mr-1"></i>Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Bookmarks Section -->
+        <div class="content-section mb-6" x-show="currentView === 'bookmarks'">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Your Bookmarks</h2>
+                <div class="text-sm text-gray-500" x-show="filteredBookmarks.length > 0">
+                    <span x-text="filteredBookmarks.length"></span> bookmarks
+                    <span x-show="searchQuery || selectedTag" class="ml-2">
+                        (filtered)
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-100 rounded-2xl mb-6">
+                    <i class="fas fa-spinner fa-spin text-2xl text-brand-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Loading your bookmarks</h3>
+                <p class="text-gray-600">Organizing your digital collection...</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="!loading && filteredBookmarks.length === 0 && bookmarks.length === 0" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-8">
+                    <i class="fas fa-bookmark text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No bookmarks found</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">Start building your bookmark collection by adding your first bookmark.</p>
+                <button @click="showAddModal = true" 
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200">
+                    <i class="fas fa-plus mr-2"></i>Add Your First Bookmark
+                </button>
+            </div>
+
+            <!-- No Search Results -->
+            <div x-show="!loading && filteredBookmarks.length === 0 && bookmarks.length > 0" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-8">
+                    <i class="fas fa-search text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No matches found</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">Try adjusting your search query or filters.</p>
+                <button @click="clearFilters()" 
+                        class="px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-xl font-semibold transition-all duration-200">
+                    Clear Filters
+                </button>
+            </div>
+            
+            <!-- Bookmarks Grid -->
+            <div x-show="!loading && filteredBookmarks.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <template x-for="bookmark in filteredBookmarks" :key="bookmark.id">
+                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white transition-all duration-200 group">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                    <a :href="bookmark.url" target="_blank" x-text="bookmark.title" class="hover:underline"></a>
+                                </h3>
+                                <p class="text-sm text-gray-500 line-clamp-1 mb-3" x-text="bookmark.url"></p>
+                            </div>
+                            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button @click="editBookmark(bookmark)" 
+                                        class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button @click="deleteBookmarkById(bookmark.id)" 
+                                        class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p x-show="bookmark.description" class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="bookmark.description"></p>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="tag in bookmark.tags.slice(0, 3)" :key="tag">
+                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg" x-text="tag"></span>
+                                </template>
+                                <span x-show="bookmark.tags.length > 3" class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">
+                                    +<span x-text="bookmark.tags.length - 3"></span>
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-400" x-text="formatDate(bookmark.created_at)"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Collections Section -->
+        <div class="content-section mb-6" x-show="currentView === 'collections'">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Your Collections</h2>
+                <div class="text-sm text-gray-500" x-show="allTags.length > 0">
+                    <span x-text="allTags.length"></span> collections
+                </div>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="!loading && allTags.length === 0" class="text-center py-20">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-8">
+                    <i class="fas fa-folder-open text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No collections found</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">Collections are created automatically when you organize your bookmarks with tags.</p>
+                <button @click="showAddModal = true" 
+                        class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all duration-200">
+                    <i class="fas fa-plus mr-2"></i>Create Your First Collection
+                </button>
+            </div>
+            
+            <!-- Collections Grid -->
+            <div x-show="!loading && allTags.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <template x-for="tag in allTags" :key="tag">
+                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-green-200 hover:bg-gradient-to-br hover:from-green-50 hover:to-white transition-all duration-200 group cursor-pointer"
+                         @click="selectedTag = tag; filterBookmarks()">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-2 mb-2 capitalize" x-text="tag"></h3>
+                                <p class="text-sm text-gray-500 line-clamp-1 mb-3" x-text="`${getBookmarksByTag(tag).length} items`"></p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                                <i class="fas fa-folder text-xl text-green-600"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample items in collection -->
+                        <div class="space-y-2 mb-4">
+                            <template x-for="bookmark in getBookmarksByTag(tag).slice(0, 3)" :key="bookmark.id">
+                                <div class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+                                    <div class="w-3 h-3 bg-green-100 rounded-sm flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-bookmark text-xs text-green-600"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-medium text-gray-900 truncate" x-text="bookmark.title"></p>
+                                    </div>
+                                </div>
+                            </template>
+                            <div x-show="getBookmarksByTag(tag).length > 3" class="text-xs text-gray-500 text-center py-1">
+                                +<span x-text="getBookmarksByTag(tag).length - 3"></span> more items
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <button @click.stop="selectedTag = tag; filterBookmarks(); currentView = 'bookmarks'"
+                                        class="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-medium transition-colors">
+                                    <i class="fas fa-eye mr-1"></i>View All
+                                </button>
+                            </div>
+                            <div class="text-xs text-gray-400" x-text="`${getBookmarksByTag(tag).length} items`"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Bookmark Modal -->
+    <div x-show="showAddModal || editingBookmark" 
+         x-cloak
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         @click.self="closeModal()">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-auto">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900" x-text="editingBookmark ? 'Edit Bookmark' : 'Add New Bookmark'"></h2>
+                    <button @click="closeModal()" 
+                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <form @submit.prevent="saveBookmark()" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">Title</label>
+                        <input type="text" 
+                               x-model="bookmarkForm.title"
+                               required
+                               class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                               placeholder="Enter bookmark title">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">URL</label>
+                        <input type="url" 
+                               x-model="bookmarkForm.url"
+                               required
+                               class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                               placeholder="https://example.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">Description</label>
+                        <textarea x-model="bookmarkForm.description"
+                                rows="3"
+                                class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
+                                placeholder="Optional description..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">Collections</label>
+                        <input type="text" 
+                               x-model="bookmarkForm.tagsString"
+                               class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                               placeholder="work, development, resources">
+                        <p class="text-sm text-gray-500 mt-2">Separate collections with commas</p>
+                    </div>
+                    
+                    <div class="flex gap-4 pt-6">
+                        <button type="button" 
+                                @click="closeModal()"
+                                class="flex-1 px-6 py-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="flex-1 px-6 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition-all duration-200">
+                            <span x-text="editingBookmark ? 'Update' : 'Save'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div x-show="showImportModal" 
+         x-cloak
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         @click.self="closeImportModal()">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl mx-auto">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Import Your Bookmarks</h2>
+                    <button @click="closeImportModal()" 
+                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">Import Format</label>
+                        <textarea x-model="importData"
+                                rows="8"
+                                class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none font-mono text-sm"
+                                placeholder="Paste JSON format:
+[
+  {
+    &quot;url&quot;: &quot;https://example.com&quot;,
+    &quot;title&quot;: &quot;Example Site&quot;,
+    &quot;folder&quot;: &quot;Development&quot;,
+    &quot;added_date&quot;: &quot;2024-01-01T00:00:00Z&quot;
+  }
+]"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" x-model="useAI" id="useAI" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="useAI" class="ml-2 text-sm text-gray-700">Use AI to categorize and tag bookmarks</label>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button type="button" 
+                                @click="closeImportModal()"
+                                class="flex-1 px-6 py-4 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-all duration-200">
+                            Cancel
+                        </button>
+                        <button @click="importBookmarks()" 
+                                :disabled="!importData"
+                                class="flex-1 px-6 py-4 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 text-white rounded-xl font-semibold transition-all duration-200">
+                            Import Bookmarks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function hyprlink() {
+            return {
+                // Data
+                bookmarks: [],
+                sessions: [],
+                history: [],
+                todaysHistory: [],
+                filteredBookmarks: [],
+                filteredSessions: [],
+                filteredHistory: [],
+                allTags: [],
+                
+                // UI State
+                loading: true,
+                showAddModal: false,
+                showImportModal: false,
+                showExtensionModal: false,
+                editingBookmark: null,
+                extensionInstalled: false,
+                
+                // Form
+                bookmarkForm: {
+                    title: '',
+                    url: '',
+                    description: '',
+                    tagsString: ''
+                },
+                
+                // Import
+                importData: '',
+                useAI: false,
+                
+                // Legacy Filters (keeping for compatibility)
+                searchQuery: '',
+                selectedTag: '',
+                sortBy: 'created_desc',
+                sessionSearchQuery: '',
+                sessionDateFilter: '',
+                sessionSortBy: 'created_desc',
+                
+                // Global Search & Filters
+                globalSearchQuery: '',
+                globalSortBy: 'created_desc',
+                
+                // View State
+                currentView: 'all', // 'all', 'bookmarks', 'sessions', 'collections', 'recent'
+                
+                // Computed
+                get todayCount() {
+                    return this.todaysHistory.length;
+                },
+                
+                // Methods
+                async init() {
+                    await this.loadBookmarks();
+                    await this.loadSessions();
+                    await this.loadTodaysHistory();
+                    this.updateAllTags();
+                    this.filterBookmarks();
+                    this.filterSessions();
+                    this.checkExtension();
+                    this.loading = false;
+                },
+                
+                async loadBookmarks() {
+                    try {
+                        const response = await fetch('/api/bookmarks');
+                        if (response.ok) {
+                            this.bookmarks = await response.json() || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading bookmarks:', error);
+                        this.bookmarks = [];
+                    }
+                },
+                
+                async loadSessions() {
+                    try {
+                        const response = await fetch('/api/sessions');
+                        if (response.ok) {
+                            this.sessions = await response.json() || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading sessions:', error);
+                        this.sessions = [];
+                    }
+                },
+
+                async loadTodaysHistory() {
+                    try {
+                        const response = await fetch('/api/history/today');
+                        if (response.ok) {
+                            this.todaysHistory = await response.json() || [];
+                            this.filteredHistory = [...this.todaysHistory]; // Initialize filtered array
+                        }
+                    } catch (error) {
+                        console.error('Error loading today\'s history:', error);
+                        this.todaysHistory = [];
+                        this.filteredHistory = [];
+                    }
+                },
+                
+                updateAllTags() {
+                    const tagSet = new Set();
+                    this.bookmarks.forEach(bookmark => {
+                        if (bookmark.tags) {
+                            bookmark.tags.forEach(tag => tagSet.add(tag));
+                        }
+                    });
+                    this.allTags = Array.from(tagSet).sort();
+                },
+                
+                filterBookmarks() {
+                    let filtered = [...this.bookmarks];
+                    
+                    // Apply view-specific filtering
+                    if (this.currentView === 'recent') {
+                        const now = new Date();
+                        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+                        
+                        filtered = filtered.filter(bookmark => {
+                            const date = new Date(bookmark.created_at);
+                            return date >= today && date < tomorrow;
+                        });
+                    }
+                    
+                    // Tag filter
+                    if (this.selectedTag) {
+                        filtered = filtered.filter(bookmark => 
+                            bookmark.tags && bookmark.tags.includes(this.selectedTag)
+                        );
+                    }
+                    
+                    // Fuzzy search
+                    if (this.searchQuery && this.searchQuery.length >= 1) {
+                        const searchFields = ['title', 'url', 'description', 'tags'];
+                        filtered = this.fuzzySearchItems(filtered, this.searchQuery, searchFields);
+                    }
+                    
+                    this.filteredBookmarks = filtered;
+                    this.sortBookmarks();
+                },
+                
+                sortBookmarks() {
+                    this.filteredBookmarks.sort((a, b) => {
+                        switch (this.sortBy) {
+                            case 'created_asc':
+                                return new Date(a.created_at) - new Date(b.created_at);
+                            case 'created_desc':
+                                return new Date(b.created_at) - new Date(a.created_at);
+                            case 'title_asc':
+                                return a.title.localeCompare(b.title);
+                            case 'title_desc':
+                                return b.title.localeCompare(a.title);
+                            default:
+                                return 0;
+                        }
+                    });
+                },
+                
+                debounceSearch() {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        this.filterBookmarks();
+                    }, 300);
+                },
+                
+                clearFilters() {
+                    this.searchQuery = '';
+                    this.selectedTag = '';
+                    this.filterBookmarks();
+                },
+                
+                async saveBookmark() {
+                    const tags = this.bookmarkForm.tagsString 
+                        ? this.bookmarkForm.tagsString.split(',').map(tag => tag.trim()).filter(tag => tag)
+                        : [];
+                    
+                    const bookmarkData = {
+                        title: this.bookmarkForm.title,
+                        url: this.bookmarkForm.url,
+                        description: this.bookmarkForm.description,
+                        tags: tags
+                    };
+                    
+                    try {
+                        let response;
+                        if (this.editingBookmark) {
+                            response = await fetch(`/api/bookmarks/${this.editingBookmark.id}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(bookmarkData)
+                            });
+                        } else {
+                            response = await fetch('/api/bookmarks', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(bookmarkData)
+                            });
+                        }
+                        
+                        if (response.ok) {
+                            await this.loadBookmarks();
+                            this.updateAllTags();
+                            this.filterBookmarks();
+                            this.closeModal();
+                        }
+                    } catch (error) {
+                        console.error('Error saving bookmark:', error);
+                    }
+                },
+
+                async createBookmarkFromHistory(historyEntry) {
+                    const bookmarkData = {
+                        title: historyEntry.title,
+                        url: historyEntry.url,
+                        description: `Saved from today's browsing history`,
+                        tags: ['history', 'today']
+                    };
+                    
+                    try {
+                        const response = await fetch('/api/bookmarks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(bookmarkData)
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadBookmarks();
+                            this.updateAllTags();
+                            this.filterBookmarks();
+                            // Show brief success feedback
+                            console.log('Bookmark created from history:', historyEntry.title);
+                        }
+                    } catch (error) {
+                        console.error('Error creating bookmark from history:', error);
+                    }
+                },
+                
+                editBookmark(bookmark) {
+                    this.editingBookmark = bookmark;
+                    this.bookmarkForm = {
+                        title: bookmark.title,
+                        url: bookmark.url,
+                        description: bookmark.description || '',
+                        tagsString: bookmark.tags ? bookmark.tags.join(', ') : ''
+                    };
+                },
+                
+                async deleteBookmarkById(id) {
+                    if (!confirm('Are you sure you want to delete this bookmark?')) {
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/bookmarks/${id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadBookmarks();
+                            this.updateAllTags();
+                            this.filterBookmarks();
+                        }
+                    } catch (error) {
+                        console.error('Error deleting bookmark:', error);
+                    }
+                },
+                
+                async importBookmarks() {
+                    if (!this.importData) return;
+                    
+                    try {
+                        const bookmarks = JSON.parse(this.importData);
+                        const importRequest = {
+                            bookmarks: bookmarks.map(b => ({
+                                url: b.url,
+                                title: b.title,
+                                folder: b.folder || 'Imported',
+                                added_date: b.added_date || new Date().toISOString()
+                            })),
+                            history: [],
+                            use_ai: this.useAI
+                        };
+                        
+                        const response = await fetch('/api/import/browser', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(importRequest)
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            alert(`Successfully imported ${result.imported_count} bookmarks!`);
+                            await this.loadBookmarks();
+                            this.updateAllTags();
+                            this.filterBookmarks();
+                            this.closeImportModal();
+                        }
+                    } catch (error) {
+                        console.error('Error importing bookmarks:', error);
+                        alert('Error importing bookmarks. Please check the format.');
+                    }
+                },
+                
+                closeModal() {
+                    this.showAddModal = false;
+                    this.editingBookmark = null;
+                    this.bookmarkForm = {
+                        title: '',
+                        url: '',
+                        description: '',
+                        tagsString: ''
+                    };
+                },
+                
+                closeImportModal() {
+                    this.showImportModal = false;
+                    this.importData = '';
+                    this.useAI = false;
+                },
+                
+                closeExtensionModal() {
+                    this.showExtensionModal = false;
+                },
+                
+                checkExtension() {
+                    // Check if Hyprlink extension is installed and available
+                    if (typeof chrome !== 'undefined' && chrome.runtime) {
+                        // For externally connectable, we need the extension ID
+                        // First try without ID (for when page is opened from extension)
+                        try {
+                            if (chrome.runtime.id) {
+                                // We're running in extension context
+                                this.extensionInstalled = true;
+                                console.log('Running in extension context');
+                                return;
+                            }
+                        } catch (e) {
+                            // Not in extension context, continue
+                        }
+                        
+                        // Try to detect extension by checking for specific DOM modifications or injected scripts
+                        // Extensions often inject content scripts that we can detect
+                        // For now, we'll use a timeout-based approach
+                        
+                        // Create a custom event to communicate with content script
+                        const checkEvent = new CustomEvent('hyprlink-check-extension', {
+                            detail: { timestamp: Date.now() }
+                        });
+                        
+                        // Listen for response
+                        const responseHandler = (event) => {
+                            if (event.detail && event.detail.extensionInstalled) {
+                                this.extensionInstalled = true;
+                                console.log('Extension detected via custom event');
+                            }
+                            window.removeEventListener('hyprlink-extension-response', responseHandler);
+                        };
+                        
+                        window.addEventListener('hyprlink-extension-response', responseHandler);
+                        window.dispatchEvent(checkEvent);
+                        
+                        // Timeout fallback
+                        setTimeout(() => {
+                            window.removeEventListener('hyprlink-extension-response', responseHandler);
+                            if (!this.extensionInstalled) {
+                                console.log('Extension not detected');
+                            }
+                        }, 500);
+                    } else {
+                        this.extensionInstalled = false;
+                        console.log('Chrome runtime not available');
+                    }
+                },
+                
+                saveCurrentSession() {
+                    if (!this.extensionInstalled) {
+                        alert('Extension not detected. Please install the Hyprlink extension first.');
+                        return;
+                    }
+                    
+                    const sessionName = prompt('Enter a name for this session:');
+                    if (!sessionName) return;
+                    
+                    // Use custom event to communicate with content script
+                    const messageId = Date.now();
+                    const message = {
+                        id: messageId,
+                        action: 'saveSession',
+                        sessionName: sessionName
+                    };
+                    
+                    // Listen for response
+                    const responseHandler = (event) => {
+                        if (event.detail && event.detail.id === messageId) {
+                            const response = event.detail.response;
+                            if (response && response.success) {
+                                console.log('Session saved successfully:', response);
+                                alert(`Session "${sessionName}" saved successfully!`);
+                                // Reload sessions to show the new one
+                                this.loadSessions();
+                            } else {
+                                console.error('Failed to save session:', response?.error);
+                                alert('Failed to save session: ' + (response?.error || 'Unknown error'));
+                            }
+                            window.removeEventListener('hyprlink-response', responseHandler);
+                        }
+                    };
+                    
+                    window.addEventListener('hyprlink-response', responseHandler);
+                    window.dispatchEvent(new CustomEvent('hyprlink-message', { detail: message }));
+                    
+                    // Timeout in case no response
+                    setTimeout(() => {
+                        window.removeEventListener('hyprlink-response', responseHandler);
+                    }, 5000);
+                },
+                
+                async restoreSession(session) {
+                    if (!confirm(`Restore session "${session.name}" with ${session.tabs.length} tabs? This will replace all open tabs except Hyprlink.`)) {
+                        return;
+                    }
+                    
+                    try {
+                        // Check if extension is available
+                        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                            // Use extension for proper tab management
+                            chrome.runtime.sendMessage({
+                                action: 'restoreSession',
+                                session: session
+                            }, (response) => {
+                                if (response && response.success) {
+                                    console.log('Session restored via extension:', response.result);
+                                    alert(response.result.message);
+                                } else {
+                                    console.error('Extension restore failed:', response?.error);
+                                    this.fallbackRestoreSession(session);
+                                }
+                            });
+                        } else {
+                            // Fallback to opening new tabs
+                            this.fallbackRestoreSession(session);
+                        }
+                    } catch (error) {
+                        console.error('Error restoring session:', error);
+                        this.fallbackRestoreSession(session);
+                    }
+                },
+
+                fallbackRestoreSession(session) {
+                    try {
+                        // Fallback: just open new tabs (can't close existing ones)
+                        const validTabs = session.tabs.filter(tab => 
+                            tab.url && 
+                            !tab.url.startsWith('chrome://') && 
+                            !tab.url.startsWith('chrome-extension://') &&
+                            !tab.url.startsWith('about:')
+                        );
+                        
+                        validTabs.forEach((tab, index) => {
+                            setTimeout(() => {
+                                window.open(tab.url, '_blank');
+                            }, index * 100);
+                        });
+                        
+                        alert(`Opened ${validTabs.length} tabs from session "${session.name}". Note: Install the Hyprlink extension for full session restore functionality.`);
+                    } catch (error) {
+                        console.error('Error in fallback restore:', error);
+                        alert('Error restoring session');
+                    }
+                },
+                
+                async deleteSession(sessionId) {
+                    if (!confirm('Are you sure you want to delete this session?')) {
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/sessions/${sessionId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            await this.loadSessions();
+                            this.filterSessions();
+                        } else {
+                            alert('Error deleting session');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting session:', error);
+                        alert('Error deleting session');
+                    }
+                },
+                
+                filterSessions() {
+                    let filtered = [...this.sessions];
+                    
+                    // Date filtering first
+                    if (this.sessionDateFilter) {
+                        const now = new Date();
+                        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        
+                        filtered = filtered.filter(session => {
+                            const sessionDate = new Date(session.created_at);
+                            
+                            switch (this.sessionDateFilter) {
+                                case 'today':
+                                    return sessionDate >= today;
+                                case 'yesterday':
+                                    return sessionDate >= yesterday && sessionDate < today;
+                                case 'week':
+                                    return sessionDate >= weekAgo;
+                                case 'month':
+                                    return sessionDate >= monthAgo;
+                                case 'older':
+                                    return sessionDate < monthAgo;
+                                default:
+                                    return true;
+                            }
+                        });
+                    }
+                    
+                    // Fuzzy text search
+                    const searchQuery = this.sessionSearchQuery || this.globalSearchQuery;
+                    if (searchQuery && searchQuery.length >= 1) {
+                        // Enhanced search fields including tab content
+                        const searchFields = ['name', 'description', 'tabs.title', 'tabs.url'];
+                        
+                        // Flatten session data for searching tabs
+                        const sessionsWithFlatTabs = filtered.map(session => ({
+                            ...session,
+                            'tabs.title': session.tabs ? session.tabs.map(tab => tab.title || '').join(' ') : '',
+                            'tabs.url': session.tabs ? session.tabs.map(tab => tab.url || '').join(' ') : ''
+                        }));
+                        
+                        filtered = this.fuzzySearchItems(sessionsWithFlatTabs, searchQuery, searchFields);
+                    }
+                    
+                    this.filteredSessions = filtered;
+                    this.sortSessions();
+                },
+                
+                sortSessions() {
+                    this.filteredSessions.sort((a, b) => {
+                        switch (this.sessionSortBy) {
+                            case 'created_asc':
+                                return new Date(a.created_at) - new Date(b.created_at);
+                            case 'created_desc':
+                                return new Date(b.created_at) - new Date(a.created_at);
+                            case 'name_asc':
+                                return a.name.localeCompare(b.name);
+                            case 'name_desc':
+                                return b.name.localeCompare(a.name);
+                            case 'tabs_desc':
+                                return (b.tabs?.length || 0) - (a.tabs?.length || 0);
+                            case 'tabs_asc':
+                                return (a.tabs?.length || 0) - (b.tabs?.length || 0);
+                            default:
+                                return 0;
+                        }
+                    });
+                },
+                
+                debounceSessionSearch() {
+                    clearTimeout(this.sessionSearchTimeout);
+                    this.sessionSearchTimeout = setTimeout(() => {
+                        this.filterSessions();
+                    }, 300);
+                },
+                
+                clearSessionFilters() {
+                    this.sessionSearchQuery = '';
+                    this.sessionDateFilter = '';
+                    this.filterSessions();
+                },
+                
+                setView(view) {
+                    this.currentView = view;
+                    
+                    // Apply view-specific filters
+                    switch (view) {
+                        case 'collections':
+                            // Show bookmarks grouped by tags
+                            this.selectedTag = '';
+                            this.searchQuery = '';
+                            break;
+                        case 'recent':
+                            // Show recent bookmarks (today)
+                            this.selectedTag = '';
+                            this.searchQuery = '';
+                            this.sortBy = 'created_desc';
+                            break;
+                        case 'bookmarks':
+                            this.selectedTag = '';
+                            this.searchQuery = '';
+                            break;
+                        case 'sessions':
+                            this.sessionSearchQuery = '';
+                            this.sessionDateFilter = '';
+                            break;
+                        default:
+                            break;
+                    }
+                    
+                    this.filterBookmarks();
+                    this.filterSessions();
+                },
+                
+                getViewTitle() {
+                    const titles = {
+                        'bookmarks': 'Bookmarks View',
+                        'sessions': 'Sessions View',
+                        'collections': 'Collections View',
+                        'recent': 'Today\'s Links'
+                    };
+                    return titles[this.currentView] || 'Overview';
+                },
+                
+                getViewBadgeClasses() {
+                    const classes = {
+                        'bookmarks': 'bg-blue-50',
+                        'sessions': 'bg-purple-50',
+                        'collections': 'bg-green-50',
+                        'recent': 'bg-gradient-to-r from-blue-50 to-purple-50'
+                    };
+                    return classes[this.currentView] || 'bg-gray-50';
+                },
+                
+                getViewDotClasses() {
+                    const classes = {
+                        'bookmarks': 'bg-blue-500',
+                        'sessions': 'bg-purple-500',
+                        'collections': 'bg-green-500',
+                        'recent': 'bg-gradient-to-r from-blue-500 to-purple-500'
+                    };
+                    return classes[this.currentView] || 'bg-gray-500';
+                },
+                
+                getViewTextClasses() {
+                    const classes = {
+                        'bookmarks': 'text-blue-700',
+                        'sessions': 'text-purple-700',
+                        'collections': 'text-green-700',  
+                        'recent': 'text-blue-700'
+                    };
+                    return classes[this.currentView] || 'text-gray-700';
+                },
+                
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                    });
+                },
+
+                // Global search functions
+                getSearchPlaceholder() {
+                    const placeholders = {
+                        'bookmarks': 'Fuzzy search bookmarks by title, URL, tags, or description...',
+                        'sessions': 'Fuzzy search sessions by name, description, or tab content...',
+                        'collections': 'Fuzzy search collections and tagged content...',
+                        'recent': 'Fuzzy search today\'s visited links...'
+                    };
+                    return placeholders[this.currentView] || 'Fuzzy search all content...';
+                },
+
+                getSearchRingClasses() {
+                    const classes = {
+                        'bookmarks': 'focus:ring-blue-500 focus:border-blue-500',
+                        'sessions': 'focus:ring-purple-500 focus:border-purple-500',
+                        'collections': 'focus:ring-green-500 focus:border-green-500',
+                        'recent': 'focus:ring-orange-500 focus:border-orange-500'
+                    };
+                    return classes[this.currentView] || 'focus:ring-blue-500 focus:border-blue-500';
+                },
+
+                getSortOptions() {
+                    const options = {
+                        'bookmarks': [
+                            { value: 'created_desc', label: 'Newest First' },
+                            { value: 'title_asc', label: 'A → Z' },
+                            { value: 'title_desc', label: 'Z → A' },
+                            { value: 'created_asc', label: 'Oldest First' }
+                        ],
+                        'sessions': [
+                            { value: 'created_desc', label: 'Newest First' },
+                            { value: 'name_asc', label: 'Name A → Z' },
+                            { value: 'tabs_desc', label: 'Most Tabs' },
+                            { value: 'name_desc', label: 'Name Z → A' },
+                            { value: 'tabs_asc', label: 'Fewest Tabs' },
+                            { value: 'created_asc', label: 'Oldest First' }
+                        ],
+                        'collections': [
+                            { value: 'name_asc', label: 'Collection A → Z' },
+                            { value: 'count_desc', label: 'Most Items' },
+                            { value: 'name_desc', label: 'Collection Z → A' },
+                            { value: 'count_asc', label: 'Fewest Items' }
+                        ],
+                        'recent': [
+                            { value: 'time_desc', label: 'Most Recent' },
+                            { value: 'title_asc', label: 'Title A → Z' },
+                            { value: 'visits_desc', label: 'Most Visited' },
+                            { value: 'time_asc', label: 'Least Recent' }
+                        ]
+                    };
+                    return options[this.currentView] || options.bookmarks;
+                },
+
+                performGlobalSearch() {
+                    // Update legacy search properties for backward compatibility
+                    this.searchQuery = this.globalSearchQuery;
+                    this.sessionSearchQuery = this.globalSearchQuery;
+                    
+                    // Apply filters based on current view
+                    this.filterContent();
+                },
+
+                filterContent() {
+                    switch (this.currentView) {
+                        case 'bookmarks':
+                            this.filterBookmarks();
+                            break;
+                        case 'collections':
+                            // Collections don't need filtering - they just show all tags
+                            break;
+                        case 'sessions':
+                            this.filterSessions();
+                            break;
+                        case 'recent':
+                            this.filterHistory();
+                            break;
+                    }
+                },
+
+                filterHistory() {
+                    let filtered = [...this.todaysHistory];
+                    
+                    // Fuzzy search for history
+                    if (this.globalSearchQuery && this.globalSearchQuery.length >= 1) {
+                        const searchFields = ['title', 'url'];
+                        filtered = this.fuzzySearchItems(filtered, this.globalSearchQuery, searchFields);
+                    }
+                    
+                    // Update the display array (we'll need to create a filtered version)
+                    this.filteredHistory = filtered;
+                    this.sortHistory();
+                },
+
+                sortContent() {
+                    // Update legacy sort properties
+                    this.sortBy = this.globalSortBy;
+                    this.sessionSortBy = this.globalSortBy;
+                    
+                    switch (this.currentView) {
+                        case 'bookmarks':
+                        case 'collections':
+                            this.sortBookmarks();
+                            break;
+                        case 'sessions':
+                            this.sortSessions();
+                            break;
+                        case 'recent':
+                            this.sortHistory();
+                            break;
+                    }
+                },
+
+                sortHistory() {
+                    const arrayToSort = this.filteredHistory.length > 0 ? this.filteredHistory : this.todaysHistory;
+                    arrayToSort.sort((a, b) => {
+                        switch (this.globalSortBy) {
+                            case 'time_asc':
+                                return new Date(a.last_visit_time) - new Date(b.last_visit_time);
+                            case 'time_desc':
+                                return new Date(b.last_visit_time) - new Date(a.last_visit_time);
+                            case 'title_asc':
+                                return a.title.localeCompare(b.title);
+                            case 'title_desc':
+                                return b.title.localeCompare(a.title);
+                            case 'visits_desc':
+                                return b.visit_count - a.visit_count;
+                            case 'visits_asc':
+                                return a.visit_count - b.visit_count;
+                            default:
+                                return new Date(b.last_visit_time) - new Date(a.last_visit_time);
+                        }
+                    });
+                },
+
+                // Collections helper function
+                getBookmarksByTag(tag) {
+                    return this.bookmarks.filter(bookmark => 
+                        bookmark.tags && bookmark.tags.includes(tag)
+                    );
+                },
+
+                // Fuzzy search implementation
+                fuzzyScore(pattern, text) {
+                    if (!pattern || !text) return 0;
+                    
+                    pattern = pattern.toLowerCase();
+                    text = text.toLowerCase();
+                    
+                    // Exact match gets highest score
+                    if (text.includes(pattern)) {
+                        return 100 - (text.length - pattern.length);
+                    }
+                    
+                    let score = 0;
+                    let patternIdx = 0;
+                    let consecutiveBonus = 0;
+                    let separatorBonus = 0;
+                    
+                    for (let i = 0; i < text.length && patternIdx < pattern.length; i++) {
+                        const textChar = text[i];
+                        const patternChar = pattern[patternIdx];
+                        
+                        if (textChar === patternChar) {
+                            score += 1 + consecutiveBonus + separatorBonus;
+                            consecutiveBonus += 2; // Bonus for consecutive matches
+                            patternIdx++;
+                            
+                            // Reset separator bonus after use
+                            separatorBonus = 0;
+                        } else {
+                            consecutiveBonus = 0;
+                            
+                            // Bonus for matches after separators (space, dash, dot, etc.)
+                            if ([' ', '-', '_', '.', '/', '\\'].includes(textChar)) {
+                                separatorBonus = 3;
+                            }
+                        }
+                    }
+                    
+                    // If we didn't match the full pattern, score is 0
+                    if (patternIdx < pattern.length) {
+                        return 0;
+                    }
+                    
+                    // Bonus for shorter strings (more precise matches)
+                    const lengthBonus = Math.max(0, 20 - text.length);
+                    
+                    return score + lengthBonus;
+                },
+
+                fuzzySearchItems(items, query, fields) {
+                    if (!query || query.length < 2) {
+                        return items;
+                    }
+                    
+                    const results = [];
+                    
+                    for (const item of items) {
+                        let maxScore = 0;
+                        
+                        // Check each field for matches
+                        for (const field of fields) {
+                            const value = this.getNestedProperty(item, field) || '';
+                            const score = this.fuzzyScore(query, value);
+                            maxScore = Math.max(maxScore, score);
+                        }
+                        
+                        if (maxScore > 0) {
+                            results.push({ item, score: maxScore });
+                        }
+                    }
+                    
+                    // Sort by score (descending) and return items
+                    return results
+                        .sort((a, b) => b.score - a.score)
+                        .map(result => result.item)
+                        .slice(0, 50); // Limit results for performance
+                },
+
+                getNestedProperty(obj, path) {
+                    if (path.includes('.')) {
+                        const parts = path.split('.');
+                        let current = obj;
+                        for (const part of parts) {
+                            current = current?.[part];
+                            if (current === undefined) return '';
+                        }
+                        return current;
+                    }
+                    
+                    if (Array.isArray(obj[path])) {
+                        return obj[path].join(' ');
+                    }
+                    
+                    return obj[path] || '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

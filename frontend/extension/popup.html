@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #1f2937;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .brand-name {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .tagline {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .content {
+      padding: 20px;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #374151;
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #6366f1;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .btn-secondary:hover {
+      background: #f8fafc;
+    }
+    
+    .status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin: 8px 0;
+      display: none;
+    }
+    
+    .status.success {
+      background: #ecfdf5;
+      color: #047857;
+    }
+    
+    .status.error {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+    
+    .latest-session {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .session-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .session-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .session-details {
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand-name">Hyprlink</div>
+    <div class="tagline">Smart Bookmarks</div>
+  </div>
+
+  <div class="content">
+    <!-- Save Current Page -->
+    <div class="section">
+      <div class="section-title">Save Current Page</div>
+      
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" id="title" class="form-input" placeholder="Page title">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">URL</label>
+        <input type="text" id="url" class="form-input" placeholder="Page URL">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <input type="text" id="tags" class="form-input" placeholder="work, research, tools">
+      </div>
+      
+      <button id="saveBookmark" class="btn btn-primary">Save Bookmark</button>
+    </div>
+
+    <!-- Session Management -->
+    <div class="section">
+      <div class="section-title">Session Management</div>
+      
+      <!-- Latest Session Info -->
+      <div id="latestSessionInfo" class="latest-session" style="display: none;">
+        <div class="session-info">
+          <div class="session-name" id="latestSessionName">Loading...</div>
+          <div class="session-details" id="latestSessionDetails">0 tabs</div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Session Name</label>
+        <input type="text" id="sessionName" class="form-input" placeholder="My Research Session">
+      </div>
+      
+      <button id="saveNewSession" class="btn btn-primary">Save New Session</button>
+      <button id="updateLatestSession" class="btn btn-secondary" style="display: none;">Update Latest Session</button>
+    </div>
+  </div>
+
+  <!-- Status Messages -->
+  <div id="status" class="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

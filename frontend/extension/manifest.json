@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Hyprlink - Smart Bookmarks",
+  "version": "1.0.0",
+  "description": "AI-powered bookmark management with intelligent organization and session recovery",
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab",
+    "contextMenus",
+    "history",
+    "idle"
+  ],
+  "host_permissions": [
+    "http://localhost:4381/*"
+  ],
+  "externally_connectable": {
+    "matches": ["http://localhost:4381/*"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:4381/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Hyprlink - Save & Organize"
+  }
+}
