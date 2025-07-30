@@ -4,13 +4,13 @@ const API_BASE = 'http://localhost:4381/api';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'saveBookmark',
-    title: 'Save to Hyprlink',
+    title: 'Save to HyprLnk',
     contexts: ['page']
   });
 
   chrome.contextMenus.create({
     id: 'saveSession',
-    title: 'Save Session to Hyprlink',
+    title: 'Save Session to HyprLnk',
     contexts: ['page']
   });
 
@@ -209,15 +209,15 @@ async function restoreSession(session) {
     const currentWindow = await chrome.windows.getCurrent({ populate: true });
     const currentTabs = currentWindow.tabs;
     
-    // Find the Hyprlink tab (localhost:4381)
+    // Find the HyprLnk tab (localhost:4381)
     const hyprLinkTab = currentTabs.find(tab => 
       tab.url && (tab.url.includes('localhost:4381') || tab.url.includes('127.0.0.1:4381'))
     );
     
-    // Get tabs to close (all except Hyprlink tab)
+    // Get tabs to close (all except HyprLnk tab)
     const tabsToClose = currentTabs.filter(tab => tab.id !== hyprLinkTab?.id);
     
-    // Close non-Hyprlink tabs
+    // Close non-HyprLnk tabs
     if (tabsToClose.length > 0) {
       const tabIds = tabsToClose.map(tab => tab.id);
       await chrome.tabs.remove(tabIds);
@@ -252,7 +252,7 @@ async function restoreSession(session) {
       }
     }
     
-    // Focus the Hyprlink tab after restoration
+    // Focus the HyprLnk tab after restoration
     if (hyprLinkTab) {
       await chrome.tabs.update(hyprLinkTab.id, { active: true });
     }

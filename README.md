@@ -1,4 +1,4 @@
-# 🔖 Hyprlink - Smart Bookmark Management
+# 🔖 HyprLnk - Smart Bookmark Management
 
 > **AI-powered bookmark organization with session management**
 
@@ -99,7 +99,7 @@ cp .env.example .env
 
 ## 🔍 Data Storage
 
-Hyprlink uses Apache Parquet files for efficient storage:
+HyprLnk uses Apache Parquet files for efficient storage:
 
 - `data/bookmarks.parquet` - Bookmark data
 - `data/sessions.parquet` - Session data

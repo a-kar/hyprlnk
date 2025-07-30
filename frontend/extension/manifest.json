@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Hyprlink - Smart Bookmarks",
+  "name": "HyprLnk - Smart Bookmarks",
   "version": "1.0.0",
   "description": "AI-powered bookmark management with intelligent organization and session recovery",
   "permissions": [
@@ -29,6 +29,6 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Hyprlink - Save & Organize"
+    "default_title": "HyprLnk - Save & Organize"
   }
 }

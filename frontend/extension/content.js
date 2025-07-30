@@ -1,4 +1,4 @@
-// Content script that runs on Hyprlink web pages
+// Content script that runs on HyprLnk web pages
 // This enables communication between the web page and the extension
 
 // Listen for extension detection requests
