@@ -35,6 +35,11 @@
     
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Prevent layout shift when scrollbar appears/disappears */
+        html {
+            overflow-y: scroll; /* Always show vertical scrollbar space */
+        }
         .card-interactive {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -482,26 +487,57 @@
         <div class="mb-8" x-show="currentView !== 'all'">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-visible transition-all duration-200 hover:shadow-md">
                 <div class="flex items-center">
-                    <div class="flex-1 flex items-center">
+                    <div class="flex-1 flex items-center relative">
                         <div class="flex items-center pl-5 pr-3 text-gray-400">
                             <i class="fas fa-search"></i>
                         </div>
                         <input type="text" 
                                x-model="globalSearchQuery"
-                               @input="performGlobalSearch()"
+                               @input="performGlobalSearch(); updateSearchSuggestions()"
+                               @focus="showSuggestions = true"
+                               @click.away="showSuggestions = false"
                                :placeholder="getSearchPlaceholder()"
                                class="flex-1 py-4 pr-3 bg-transparent border-none focus:outline-none placeholder-gray-400 text-gray-900">
                         <!-- Clear button -->
                         <button x-show="globalSearchQuery" 
-                                @click="globalSearchQuery = ''; performGlobalSearch()"
+                                @click="globalSearchQuery = ''; performGlobalSearch(); showSuggestions = false"
                                 class="px-3 py-2 text-gray-400 hover:text-gray-600 transition-colors">
                                 <i class="fas fa-times text-sm"></i>
                         </button>
+                        
+                        <!-- Search Suggestions Dropdown -->
+                        <div x-show="showSuggestions && searchSuggestions.length > 0 && globalSearchQuery.length > 0"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-64 overflow-y-auto">
+                            <div class="px-3 py-1 text-xs text-gray-500 font-medium border-b border-gray-100 mb-1">
+                                Suggestions
+                            </div>
+                            <template x-for="suggestion in searchSuggestions.slice(0, 8)" :key="suggestion.id">
+                                <button @click="globalSearchQuery = suggestion.text; performGlobalSearch(); showSuggestions = false"
+                                        class="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                                    <div class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                                         :class="suggestion.type === 'bookmark' ? 'bg-blue-100' : suggestion.type === 'session' ? 'bg-purple-100' : 'bg-orange-100'">
+                                        <i :class="suggestion.type === 'bookmark' ? 'fas fa-bookmark text-blue-600' : suggestion.type === 'session' ? 'fas fa-tabs text-purple-600' : 'fas fa-history text-orange-600'"
+                                           class="text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate" x-text="suggestion.title"></div>
+                                        <div class="text-xs text-gray-500 truncate" x-text="suggestion.subtitle"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 capitalize" x-text="suggestion.type"></div>
+                                </button>
+                            </template>
+                        </div>
                     </div>
                     
                     <!-- Filters -->
                     <div class="flex items-center border-l border-gray-200">
-                        <div class="relative" x-data="{ open: false }">
+                        <div class="relative" x-data="{ open: false }" style="z-index: 1000;">
                             <button @click="open = !open" 
                                     @click.away="open = false"
                                     class="flex items-center gap-2 px-4 py-2 bg-transparent hover:bg-gray-50 focus:outline-none text-gray-700 text-sm cursor-pointer transition-colors">
@@ -517,7 +553,8 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1"
+                                 style="z-index: 9999;">
                                 <button @click="selectedTag = ''; filterContent(); open = false" 
                                         class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                                         :class="!selectedTag && 'font-medium bg-gray-50'">
@@ -536,7 +573,7 @@
                     
                     <!-- Sort -->
                     <div class="flex items-center border-l border-gray-200">
-                        <div class="relative">
+                        <div class="relative" style="z-index: 1000;">
                             <button @click="sortDropdownOpen = !sortDropdownOpen" 
                                     @click.away="sortDropdownOpen = false"
                                     class="flex items-center gap-2 px-4 py-2 bg-transparent hover:bg-gray-50 focus:outline-none text-gray-700 text-sm cursor-pointer transition-colors">
@@ -552,7 +589,8 @@
                                  x-transition:leave="transition ease-in duration-75"
                                  x-transition:leave-start="transform opacity-100 scale-100"
                                  x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1"
+                                 style="z-index: 9999;">
                                 <template x-for="option in getSortOptions()" :key="option.value">
                                     <button @click="globalSortBy = option.value; sortContent(); sortDropdownOpen = false" 
                                             class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -1085,6 +1123,8 @@
                 globalSearchQuery: '',
                 globalSortBy: 'created_desc',
                 sortDropdownOpen: false,
+                searchSuggestions: [],
+                showSuggestions: false,
                 
                 // View State
                 currentView: 'all', // 'all', 'bookmarks', 'sessions', 'collections', 'recent'
@@ -1779,6 +1819,70 @@
                     
                     // Apply filters based on current view
                     this.filterContent();
+                },
+
+                updateSearchSuggestions() {
+                    const query = this.globalSearchQuery.toLowerCase().trim();
+                    if (query.length < 2) {
+                        this.searchSuggestions = [];
+                        return;
+                    }
+
+                    const suggestions = [];
+                    
+                    // Add bookmark suggestions
+                    this.bookmarks.forEach(bookmark => {
+                        if (bookmark.title.toLowerCase().includes(query) || 
+                            bookmark.url.toLowerCase().includes(query) ||
+                            bookmark.description.toLowerCase().includes(query) ||
+                            (bookmark.tags && bookmark.tags.some(tag => tag.toLowerCase().includes(query)))) {
+                            suggestions.push({
+                                id: `bookmark-${bookmark.id}`,
+                                type: 'bookmark',
+                                title: bookmark.title,
+                                subtitle: bookmark.url,
+                                text: bookmark.title
+                            });
+                        }
+                    });
+
+                    // Add session suggestions
+                    this.sessions.forEach(session => {
+                        if (session.name.toLowerCase().includes(query) || 
+                            session.description.toLowerCase().includes(query)) {
+                            suggestions.push({
+                                id: `session-${session.id}`,
+                                type: 'session',
+                                title: session.name,
+                                subtitle: session.description || `${session.tabs.length} tabs`,
+                                text: session.name
+                            });
+                        }
+                    });
+
+                    // Add history suggestions
+                    this.todaysHistory.forEach(entry => {
+                        if (entry.title.toLowerCase().includes(query) || 
+                            entry.url.toLowerCase().includes(query)) {
+                            suggestions.push({
+                                id: `history-${entry.url}`,
+                                type: 'history',
+                                title: entry.title,
+                                subtitle: entry.url,
+                                text: entry.title
+                            });
+                        }
+                    });
+
+                    // Sort by relevance (exact matches first, then partial matches)
+                    suggestions.sort((a, b) => {
+                        const aExact = a.title.toLowerCase().startsWith(query) ? 1 : 0;
+                        const bExact = b.title.toLowerCase().startsWith(query) ? 1 : 0;
+                        return bExact - aExact;
+                    });
+
+                    // Update suggestions
+                    this.searchSuggestions = suggestions.slice(0, 8);
                 },
 
                 filterContent() {
