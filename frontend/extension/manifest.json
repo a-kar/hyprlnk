@@ -9,10 +9,13 @@
     "activeTab",
     "contextMenus",
     "history",
-    "idle"
+    "idle",
+    "webNavigation"
   ],
   "host_permissions": [
-    "http://localhost:4381/*"
+    "http://localhost:4381/*",
+    "http://*/*",
+    "https://*/*"
   ],
   "externally_connectable": {
     "matches": ["http://localhost:4381/*"]
@@ -22,6 +25,12 @@
       "matches": ["http://localhost:4381/*"],
       "js": ["content.js"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["link-tracker.js"],
+      "run_at": "document_end",
+      "exclude_matches": ["http://localhost:4381/*"]
     }
   ],
   "background": {

@@ -63,6 +63,9 @@ type HistoryEntry struct {
     Title         string    `json:"title"`
     VisitCount    int       `json:"visit_count"`
     LastVisitTime time.Time `json:"last_visit_time"`
+    SourceURL     string    `json:"source_url,omitempty"`
+    SourceTitle   string    `json:"source_title,omitempty"`
+    LinkText      string    `json:"link_text,omitempty"`
 }
 
 type AISegmentation struct {
@@ -70,6 +73,20 @@ type AISegmentation struct {
     Tags        []string `json:"tags"`
     Description string   `json:"description"`
     Confidence  float64  `json:"confidence"`
+}
+
+type LinkClick struct {
+    ID              int64     `json:"id"`
+    DestinationURL  string    `json:"destination_url"`
+    DestinationTitle string   `json:"destination_title"`
+    SourceURL       string    `json:"source_url"`
+    SourceTitle     string    `json:"source_title"`
+    LinkText        string    `json:"link_text"`
+    ClickType       string    `json:"click_type"` // external_link, internal_link, form_submit
+    Domain          string    `json:"domain"`
+    IsNewTab        bool      `json:"is_new_tab"`
+    Timestamp       time.Time `json:"timestamp"`
+    CreatedAt       time.Time `json:"created_at"`
 }
 
 type BookmarkService struct {
@@ -111,6 +128,22 @@ func (bs *BookmarkService) getHistorySchema() *arrow.Schema {
         {Name: "title", Type: arrow.BinaryTypes.String},
         {Name: "visit_count", Type: arrow.PrimitiveTypes.Int32},
         {Name: "last_visit_time", Type: arrow.FixedWidthTypes.Timestamp_ms},
+    }, nil)
+}
+
+func (bs *BookmarkService) getLinkClickSchema() *arrow.Schema {
+    return arrow.NewSchema([]arrow.Field{
+        {Name: "id", Type: arrow.PrimitiveTypes.Int64},
+        {Name: "destination_url", Type: arrow.BinaryTypes.String},
+        {Name: "destination_title", Type: arrow.BinaryTypes.String},
+        {Name: "source_url", Type: arrow.BinaryTypes.String},
+        {Name: "source_title", Type: arrow.BinaryTypes.String},
+        {Name: "link_text", Type: arrow.BinaryTypes.String},
+        {Name: "click_type", Type: arrow.BinaryTypes.String},
+        {Name: "domain", Type: arrow.BinaryTypes.String},
+        {Name: "is_new_tab", Type: arrow.FixedWidthTypes.Boolean},
+        {Name: "timestamp", Type: arrow.FixedWidthTypes.Timestamp_ms},
+        {Name: "created_at", Type: arrow.FixedWidthTypes.Timestamp_ms},
     }, nil)
 }
 
@@ -385,6 +418,151 @@ func (bs *BookmarkService) readHistoryFromParquet() ([]HistoryEntry, error) {
     return history, nil
 }
 
+func (bs *BookmarkService) enrichHistoryWithLinkClicks(history []HistoryEntry) ([]HistoryEntry, error) {
+    // Get link clicks
+    linkClicks, err := bs.readLinkClicksFromParquet()
+    if err != nil {
+        // If we can't read link clicks, just return history as-is
+        return history, nil
+    }
+    
+    // Create a map of destination URL to most recent link click
+    clickMap := make(map[string]LinkClick)
+    for _, click := range linkClicks {
+        // Use the most recent click for each destination URL
+        if existing, exists := clickMap[click.DestinationURL]; !exists || click.Timestamp.After(existing.Timestamp) {
+            clickMap[click.DestinationURL] = click
+        }
+    }
+    
+    // Enrich history entries with link click data
+    enrichedHistory := make([]HistoryEntry, len(history))
+    for i, entry := range history {
+        enrichedHistory[i] = entry
+        if click, exists := clickMap[entry.URL]; exists {
+            // Only add source info if the click happened on the same day
+            // (Chrome's lastVisitTime updates on every visit, but we want the original click source)
+            clickDay := click.Timestamp.Truncate(24 * time.Hour)
+            visitDay := entry.LastVisitTime.Truncate(24 * time.Hour)
+            if clickDay.Equal(visitDay) {
+                enrichedHistory[i].SourceURL = click.SourceURL
+                enrichedHistory[i].SourceTitle = click.SourceTitle
+                enrichedHistory[i].LinkText = click.LinkText
+            }
+        }
+    }
+    
+    return enrichedHistory, nil
+}
+
+// Helper function to get absolute duration
+func abs(d time.Duration) time.Duration {
+    if d < 0 {
+        return -d
+    }
+    return d
+}
+
+func (bs *BookmarkService) writeLinkClicksToParquet(clicks []LinkClick) error {
+    schema := bs.getLinkClickSchema()
+    mem := memory.NewGoAllocator()
+    builder := array.NewRecordBuilder(mem, schema)
+    defer builder.Release()
+
+    for _, click := range clicks {
+        builder.Field(0).(*array.Int64Builder).Append(click.ID)
+        builder.Field(1).(*array.StringBuilder).Append(click.DestinationURL)
+        builder.Field(2).(*array.StringBuilder).Append(click.DestinationTitle)
+        builder.Field(3).(*array.StringBuilder).Append(click.SourceURL)
+        builder.Field(4).(*array.StringBuilder).Append(click.SourceTitle)
+        builder.Field(5).(*array.StringBuilder).Append(click.LinkText)
+        builder.Field(6).(*array.StringBuilder).Append(click.ClickType)
+        builder.Field(7).(*array.StringBuilder).Append(click.Domain)
+        builder.Field(8).(*array.BooleanBuilder).Append(click.IsNewTab)
+        builder.Field(9).(*array.TimestampBuilder).Append(arrow.Timestamp(click.Timestamp.UnixMilli()))
+        builder.Field(10).(*array.TimestampBuilder).Append(arrow.Timestamp(click.CreatedAt.UnixMilli()))
+    }
+
+    record := builder.NewRecord()
+    defer record.Release()
+
+    filename := filepath.Join(bs.dataDir, "link-clicks.parquet")
+    file, err := os.Create(filename)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+
+    writer, err := pqarrow.NewFileWriter(schema, file, parquet.NewWriterProperties(), pqarrow.DefaultWriterProps())
+    if err != nil {
+        return err
+    }
+    defer writer.Close()
+
+    return writer.Write(record)
+}
+
+func (bs *BookmarkService) readLinkClicksFromParquet() ([]LinkClick, error) {
+    filename := filepath.Join(bs.dataDir, "link-clicks.parquet")
+    if _, err := os.Stat(filename); os.IsNotExist(err) {
+        return []LinkClick{}, nil
+    }
+
+    fileReader, err := file.OpenParquetFile(filename, false)
+    if err != nil {
+        return nil, fmt.Errorf("failed to open parquet file: %w", err)
+    }
+    defer fileReader.Close()
+
+    reader, err := pqarrow.NewFileReader(fileReader, pqarrow.ArrowReadProperties{}, memory.DefaultAllocator)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create parquet reader: %w", err)
+    }
+
+    table, err := reader.ReadTable(context.Background())
+    if err != nil {
+        return nil, fmt.Errorf("failed to read table: %w", err)
+    }
+    defer table.Release()
+
+    var clicks []LinkClick
+    
+    if table.NumRows() == 0 {
+        return clicks, nil
+    }
+
+    for i := 0; i < int(table.NumRows()); i++ {
+        idCol := table.Column(0).Data().Chunk(0).(*array.Int64)
+        destUrlCol := table.Column(1).Data().Chunk(0).(*array.String)
+        destTitleCol := table.Column(2).Data().Chunk(0).(*array.String)
+        srcUrlCol := table.Column(3).Data().Chunk(0).(*array.String)
+        srcTitleCol := table.Column(4).Data().Chunk(0).(*array.String)
+        linkTextCol := table.Column(5).Data().Chunk(0).(*array.String)
+        clickTypeCol := table.Column(6).Data().Chunk(0).(*array.String)
+        domainCol := table.Column(7).Data().Chunk(0).(*array.String)
+        newTabCol := table.Column(8).Data().Chunk(0).(*array.Boolean)
+        timestampCol := table.Column(9).Data().Chunk(0).(*array.Timestamp)
+        createdCol := table.Column(10).Data().Chunk(0).(*array.Timestamp)
+
+        click := LinkClick{
+            ID:              idCol.Value(i),
+            DestinationURL:  destUrlCol.Value(i),
+            DestinationTitle: destTitleCol.Value(i),
+            SourceURL:       srcUrlCol.Value(i),
+            SourceTitle:     srcTitleCol.Value(i),
+            LinkText:        linkTextCol.Value(i),
+            ClickType:       clickTypeCol.Value(i),
+            Domain:          domainCol.Value(i),
+            IsNewTab:        newTabCol.Value(i),
+            Timestamp:       time.UnixMilli(int64(timestampCol.Value(i))),
+            CreatedAt:       time.UnixMilli(int64(createdCol.Value(i))),
+        }
+        clicks = append(clicks, click)
+    }
+
+    return clicks, nil
+}
+
 func (bs *BookmarkService) getAllBookmarks(w http.ResponseWriter, r *http.Request) {
     bookmarks, err := bs.readBookmarksFromParquet()
     if err != nil {
@@ -653,8 +831,14 @@ func (bs *BookmarkService) getAllHistory(w http.ResponseWriter, r *http.Request)
         return
     }
 
+    // Enrich with link click data
+    enrichedHistory, err := bs.enrichHistoryWithLinkClicks(history)
+    if err != nil {
+        enrichedHistory = history
+    }
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(history)
+    json.NewEncoder(w).Encode(enrichedHistory)
 }
 
 func (bs *BookmarkService) getTodaysHistory(w http.ResponseWriter, r *http.Request) {
@@ -674,8 +858,85 @@ func (bs *BookmarkService) getTodaysHistory(w http.ResponseWriter, r *http.Reque
         }
     }
 
+    // Enrich with link click data
+    enrichedHistory, err := bs.enrichHistoryWithLinkClicks(todaysHistory)
+    if err != nil {
+        // If enrichment fails, just return the original history
+        enrichedHistory = todaysHistory
+    }
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(todaysHistory)
+    json.NewEncoder(w).Encode(enrichedHistory)
+}
+
+func (bs *BookmarkService) getWeekHistory(w http.ResponseWriter, r *http.Request) {
+    history, err := bs.readHistoryFromParquet()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    now := time.Now()
+    weekAgo := now.AddDate(0, 0, -7)
+
+    var weekHistory []HistoryEntry
+    for _, entry := range history {
+        if entry.LastVisitTime.After(weekAgo) {
+            weekHistory = append(weekHistory, entry)
+        }
+    }
+
+    // Enrich with link click data
+    enrichedHistory, err := bs.enrichHistoryWithLinkClicks(weekHistory)
+    if err != nil {
+        enrichedHistory = weekHistory
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(enrichedHistory)
+}
+
+func (bs *BookmarkService) getMonthHistory(w http.ResponseWriter, r *http.Request) {
+    history, err := bs.readHistoryFromParquet()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    now := time.Now()
+    monthAgo := now.AddDate(0, 0, -30)
+
+    var monthHistory []HistoryEntry
+    for _, entry := range history {
+        if entry.LastVisitTime.After(monthAgo) {
+            monthHistory = append(monthHistory, entry)
+        }
+    }
+
+    // Enrich with link click data
+    enrichedHistory, err := bs.enrichHistoryWithLinkClicks(monthHistory)
+    if err != nil {
+        enrichedHistory = monthHistory
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(enrichedHistory)
+}
+
+func (bs *BookmarkService) getHistoryCount(w http.ResponseWriter, r *http.Request) {
+    history, err := bs.readHistoryFromParquet()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    response := map[string]interface{}{
+        "total_count": len(history),
+        "message":     "History count retrieved successfully",
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
 }
 
 func (bs *BookmarkService) syncHistory(w http.ResponseWriter, r *http.Request) {
@@ -727,6 +988,79 @@ func (bs *BookmarkService) syncHistory(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(response)
+}
+
+func (bs *BookmarkService) syncLinkClicks(w http.ResponseWriter, r *http.Request) {
+    var clickRequest struct {
+        Clicks []struct {
+            DestinationURL   string `json:"destinationUrl"`
+            DestinationTitle string `json:"destinationTitle"`
+            SourceURL        string `json:"sourceUrl"`
+            SourceTitle      string `json:"sourceTitle"`
+            LinkText         string `json:"linkText"`
+            ClickType        string `json:"clickType"`
+            Domain           string `json:"domain"`
+            IsNewTab         bool   `json:"isNewTab"`
+            Timestamp        int64  `json:"timestamp"`
+        } `json:"clicks"`
+    }
+
+    if err := json.NewDecoder(r.Body).Decode(&clickRequest); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    existingClicks, err := bs.readLinkClicksFromParquet()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Convert incoming clicks to LinkClick structs
+    var newClicks []LinkClick
+    for _, click := range clickRequest.Clicks {
+        newClick := LinkClick{
+            ID:               time.Now().UnixNano(),
+            DestinationURL:   click.DestinationURL,
+            DestinationTitle: click.DestinationTitle,
+            SourceURL:        click.SourceURL,
+            SourceTitle:      click.SourceTitle,
+            LinkText:         click.LinkText,
+            ClickType:        click.ClickType,
+            Domain:           click.Domain,
+            IsNewTab:         click.IsNewTab,
+            Timestamp:        time.UnixMilli(click.Timestamp),
+            CreatedAt:        time.Now(),
+        }
+        newClicks = append(newClicks, newClick)
+    }
+
+    allClicks := append(existingClicks, newClicks...)
+    
+    if err := bs.writeLinkClicksToParquet(allClicks); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    response := map[string]interface{}{
+        "synced_count": len(newClicks),
+        "total_count":  len(allClicks),
+        "message":      "Link clicks synchronized successfully",
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+func (bs *BookmarkService) getAllLinkClicks(w http.ResponseWriter, r *http.Request) {
+    clicks, err := bs.readLinkClicksFromParquet()
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(clicks)
 }
 
 func (bs *BookmarkService) importBrowserData(w http.ResponseWriter, r *http.Request) {
@@ -848,7 +1182,11 @@ func (bs *BookmarkService) generateTagsFromContent(bookmark Bookmark) []string {
 }
 
 func main() {
-    service := NewBookmarkService("./data")
+    dataDir := os.Getenv("DATA_DIR")
+    if dataDir == "" {
+        dataDir = "./data"
+    }
+    service := NewBookmarkService(dataDir)
 
     router := mux.NewRouter()
 
@@ -865,10 +1203,22 @@ func main() {
     
     router.HandleFunc("/api/history", service.getAllHistory).Methods("GET")
     router.HandleFunc("/api/history/today", service.getTodaysHistory).Methods("GET")
+    router.HandleFunc("/api/history/week", service.getWeekHistory).Methods("GET")
+    router.HandleFunc("/api/history/month", service.getMonthHistory).Methods("GET")
+    router.HandleFunc("/api/history/count", service.getHistoryCount).Methods("GET")
     router.HandleFunc("/api/history/sync", service.syncHistory).Methods("POST")
+    
+    router.HandleFunc("/api/link-clicks", service.getAllLinkClicks).Methods("GET")
+    router.HandleFunc("/api/link-clicks/sync", service.syncLinkClicks).Methods("POST")
     
     router.HandleFunc("/api/import/browser", service.importBrowserData).Methods("POST")
     router.HandleFunc("/api/ai/segment", service.bulkSegmentBookmarks).Methods("POST")
+    
+    // Health/ping endpoint for extension testing
+    router.HandleFunc("/api/ping", func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(map[string]string{"status": "ok", "timestamp": time.Now().UTC().Format(time.RFC3339)})
+    }).Methods("GET")
     
     router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")

@@ -104,6 +104,51 @@
         .content-section {
             transition: all 0.3s ease;
         }
+        
+        /* Welcome card animations */
+        .welcome-card {
+            animation: slideInDown 0.6s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Extension status indicators */
+        .extension-status-connected {
+            animation: fadeInGreen 0.5s ease-out;
+        }
+        
+        .extension-status-warning {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeInGreen {
+            from {
+                opacity: 0;
+                background-color: rgba(59, 130, 246, 0.1);
+            }
+            to {
+                opacity: 1;
+                background-color: rgba(34, 197, 94, 0.1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
     </style>
 </head>
 
@@ -114,7 +159,7 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <i class="fas fa-bookmark text-white text-sm"></i>
+                        <i class="fas fa-link text-white text-sm"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900 tracking-tight">HyprLnk</h1>
@@ -155,10 +200,101 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <!-- Welcome Intro Card (Dismissible) -->
+        <div x-show="currentView === 'all' && !welcomeDismissed" class="py-6">
+            <div class="welcome-card bg-gradient-to-r from-brand-500 to-purple-600 rounded-3xl p-6 sm:p-8 text-white relative">
+                <!-- Dismiss Button -->
+                <button @click="dismissWelcome()" 
+                        class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200">
+                    <i class="fas fa-times text-white text-sm"></i>
+                </button>
+                
+                <div class="max-w-4xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mr-4">
+                            <i class="fas fa-rocket text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl sm:text-3xl font-bold">Welcome to Hyprlink!</h2>
+                            <p class="text-lg opacity-90">Your intelligent bookmark and session manager</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Extension Status -->
+                    <div x-show="!extensionConnected" class="extension-status-warning mb-6 p-4 bg-amber-500/20 border border-amber-400/30 rounded-xl">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-exclamation-triangle text-amber-200 mr-3"></i>
+                            <h3 class="font-semibold text-amber-100">Browser Extension Required</h3>
+                        </div>
+                        <p class="text-amber-100 text-sm mb-3">Install the browser extension to unlock session management and automatic history syncing.</p>
+                        <button @click="showExtensionHelp = !showExtensionHelp" 
+                                class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors">
+                            <i class="fas fa-puzzle-piece mr-2"></i>Install Extension
+                        </button>
+                    </div>
+                    
+                    <!-- Extension Help -->
+                    <div x-show="showExtensionHelp" x-cloak class="mb-6 p-4 bg-white/10 rounded-xl">
+                        <h4 class="font-semibold mb-3">Quick Extension Setup:</h4>
+                        <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="font-medium mb-2">📌 Chrome/Edge/Brave:</p>
+                                <ol class="list-decimal list-inside space-y-1 opacity-90">
+                                    <li>Go to <code class="bg-white/20 px-1 rounded">chrome://extensions/</code></li>
+                                    <li>Enable "Developer mode"</li>
+                                    <li>Click "Load unpacked"</li>
+                                    <li>Select the extension folder</li>
+                                </ol>
+                            </div>
+                            <div>
+                                <p class="font-medium mb-2">🦊 Firefox:</p>
+                                <ol class="list-decimal list-inside space-y-1 opacity-90">
+                                    <li>Go to <code class="bg-white/20 px-1 rounded">about:debugging</code></li>
+                                    <li>Click "This Firefox"</li>
+                                    <li>Click "Load Temporary Add-on"</li>
+                                    <li>Select manifest.json</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Extension Connected -->
+                    <div x-show="extensionConnected" class="extension-status-connected mb-6 p-4 bg-green-500/20 border border-green-400/30 rounded-xl">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-200 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-green-100">Extension Connected!</h3>
+                                <p class="text-green-100 text-sm">You can now save sessions and sync browsing history automatically.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="flex flex-wrap gap-3">
+                        <button @click="showAddModal = true" 
+                                class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
+                            <i class="fas fa-plus mr-2"></i>Add First Bookmark
+                        </button>
+                        <button @click="showImportModal = true" 
+                                class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
+                            <i class="fas fa-download mr-2"></i>Import Bookmarks
+                        </button>
+                        <button @click="dismissWelcome()" 
+                                class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all duration-200">
+                            <i class="fas fa-check mr-2"></i>I'm Ready!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Hero Stats -->
         <div class="py-8 sm:py-12">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div class="card-interactive card-bookmarks bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('bookmarks')">
+                <div class="card-interactive card-bookmarks bg-white rounded-2xl p-6 border-2 transition-all duration-200"
+                     :class="activeMainCard === 'bookmarks' ? 'border-blue-200 bg-gradient-to-br from-blue-50 to-white' : 'border-gray-100'"
+                     @click="activeMainCard = 'bookmarks'; setView('bookmarks')">
                     <div class="flex items-center">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600 mb-1">Bookmarks</p>
@@ -170,7 +306,9 @@
                     </div>
                 </div>
                 
-                <div class="card-interactive card-sessions bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('sessions')">
+                <div class="card-interactive card-sessions bg-white rounded-2xl p-6 border-2 transition-all duration-200"
+                     :class="activeMainCard === 'sessions' ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-white' : 'border-gray-100'"
+                     @click="activeMainCard = 'sessions'; setView('sessions')">
                     <div class="flex items-center">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600 mb-1">Sessions</p>
@@ -182,7 +320,9 @@
                     </div>
                 </div>
                 
-                <div class="card-interactive card-collections bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('collections')">
+                <div class="card-interactive card-collections bg-white rounded-2xl p-6 border-2 transition-all duration-200"
+                     :class="activeMainCard === 'collections' ? 'border-green-200 bg-gradient-to-br from-green-50 to-white' : 'border-gray-100'"
+                     @click="activeMainCard = 'collections'; setView('collections')">
                     <div class="flex items-center">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-600 mb-1">Collections</p>
@@ -194,50 +334,25 @@
                     </div>
                 </div>
                 
-                <div class="card-interactive card-recent bg-white rounded-2xl p-6 border-2 border-gray-100" @click="setView('recent')">
+                <div class="card-interactive card-recent bg-white rounded-2xl p-6 border-2 transition-all duration-200"
+                     :class="activeMainCard === 'recent' ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-white' : 'border-gray-100'"
+                     @click="activeMainCard = 'recent'; setView('recent')">
                     <div class="flex items-center">
                         <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-600 mb-1">Today</p>
+                            <p class="text-sm font-medium text-gray-600 mb-1">History Today</p>
                             <p class="text-3xl font-bold text-gray-900 card-number" x-text="todayCount"></p>
                         </div>
                         <div class="icon-bg w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-sun text-xl text-orange-600"></i>
+                            <i class="fas fa-history text-xl text-orange-600"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+
         <!-- Overview Content - Only shown on main dashboard -->
         <div x-show="currentView === 'all'">
-            <!-- Welcome Section -->
-            <div class="mb-8">
-                <div class="bg-gradient-to-r from-brand-500 to-purple-600 rounded-3xl p-8 text-white">
-                    <div class="max-w-4xl">
-                        <h2 class="text-3xl font-bold mb-4">Welcome to HyprLnk</h2>
-                        <p class="text-xl opacity-90 mb-6">Your intelligent bookmark and session manager</p>
-                        <div class="flex flex-wrap gap-4 mb-6">
-                            <button @click="showAddModal = true" 
-                                    class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
-                                <i class="fas fa-plus mr-2"></i>Add Bookmark
-                            </button>
-                            <button @click="showImportModal = true" 
-                                    class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl font-semibold transition-all duration-200 border border-white/20">
-                                <i class="fas fa-download mr-2"></i>Import Data
-                            </button>
-                        </div>
-                        <div class="flex flex-wrap gap-4 text-sm">
-                            <span class="text-white/80">Learn more:</span>
-                            <a href="./api-docs.html" class="text-white hover:text-white/80 underline underline-offset-2 transition-colors">
-                                <i class="fas fa-code mr-1"></i>API Documentation
-                            </a>
-                            <a href="./github-landing.html" class="text-white hover:text-white/80 underline underline-offset-2 transition-colors">
-                                <i class="fas fa-home mr-1"></i>Self-Host Guide
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Recent Activity Grid -->
             <div class="grid lg:grid-cols-2 gap-8 mb-8">
@@ -434,53 +549,6 @@
                 </div>
             </div>
 
-            <!-- Getting Started Section (for new users) -->
-            <div x-show="bookmarks.length === 0 && sessions.length === 0" class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-3xl p-8 border-2 border-gray-100">
-                <div class="max-w-4xl mx-auto text-center">
-                    <div class="w-20 h-20 bg-gradient-to-br from-brand-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-rocket text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Get Started with Hyprlink</h3>
-                    <p class="text-gray-600 mb-8 max-w-2xl mx-auto">Transform your browsing experience with intelligent bookmark management and session recovery</p>
-                    
-                    <div class="grid md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-bookmark text-blue-600 text-lg"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Save Bookmarks</h4>
-                            <p class="text-sm text-gray-600 mb-4">Organize your favorite links with smart tagging and collections</p>
-                            <button @click="showAddModal = true" 
-                                    class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                                Add Bookmark
-                            </button>
-                        </div>
-                        
-                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background-color: #e9d5ff !important;">
-                                <i class="fas fa-layer-group text-purple-600 text-lg"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Manage Sessions</h4>
-                            <p class="text-sm text-gray-600 mb-4">Save and restore your browsing sessions across devices</p>
-                            <button class="w-full px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
-                                Install Extension
-                            </button>
-                        </div>
-                        
-                        <div class="bg-white rounded-2xl p-6 border border-gray-200">
-                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-download text-orange-600 text-lg"></i>
-                            </div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Import Data</h4>
-                            <p class="text-sm text-gray-600 mb-4">Bring your existing bookmarks from other browsers</p>
-                            <button @click="showImportModal = true" 
-                                    class="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors">
-                                Import Now
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Global Search Section -->
@@ -608,7 +676,7 @@
         <!-- View Navigation -->
         <div class="mb-6" x-show="currentView !== 'all'">
             <div class="flex items-center justify-between">
-                <button @click="setView('all')" 
+                <button @click="activeMainCard = null; setView('all')" 
                         class="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Overview
@@ -633,10 +701,13 @@
             
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <template x-for="session in filteredSessions" :key="session.id">
-                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-purple-200 hover:bg-gradient-to-br hover:from-purple-50 hover:to-white transition-all duration-200 group">
+                    <div class="bg-white rounded-2xl p-6 border-2 transition-all duration-200 group"
+                         :class="activeSession === session.id ? 'border-purple-200 bg-gradient-to-br from-purple-50 to-white' : 'border-gray-100 hover:border-purple-200 hover:bg-gradient-to-br hover:from-purple-50 hover:to-white'">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 text-lg mb-2" x-text="session.name"></h3>
+                                <h3 class="font-semibold text-gray-900 text-lg mb-2 cursor-pointer hover:text-purple-600 transition-colors" 
+                                   x-text="session.name"
+                                   @click="activeSession = session.id"></h3>
                                 <p class="text-sm text-gray-600 mb-3" x-text="session.description"></p>
                                 <div class="flex items-center text-xs text-gray-500 mb-4">
                                     <i class="fas fa-calendar mr-2"></i>
@@ -702,12 +773,69 @@
             </div>
         </div>
 
-        <!-- Today's History Section -->
+        <!-- History Section -->
         <div class="content-section mb-6" x-show="currentView === 'recent'">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">Today's Visited Links</h2>
-                <div class="text-sm text-gray-500" x-show="todaysHistory.length > 0">
-                    <span x-text="todaysHistory.length"></span> links visited today
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900" x-text="getHistoryTitle()"></h2>
+                    <div class="flex flex-wrap gap-3 mt-3">
+                        <button @click="setTimeFilter('today')" 
+                                :class="timeFilter === 'today' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm">
+                            <i class="fas fa-sun mr-1"></i>Today
+                        </button>
+                        <button @click="setTimeFilter('week')" 
+                                :class="timeFilter === 'week' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm">
+                            <i class="fas fa-calendar-week mr-1"></i>This Week
+                        </button>
+                        <button @click="setTimeFilter('month')" 
+                                :class="timeFilter === 'month' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm">
+                            <i class="fas fa-calendar-alt mr-1"></i>This Month
+                        </button>
+                        <button @click="setTimeFilter('all')" 
+                                :class="timeFilter === 'all' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                class="px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm">
+                            <i class="fas fa-infinity mr-1"></i>All Time
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics Section -->
+            <div class="bg-white rounded-2xl p-6 border-2 border-orange-100 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Browsing Statistics</h3>
+                            <p class="text-gray-600 text-sm" x-text="getStatisticsDescription()"></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-3xl font-bold text-orange-600" x-text="totalLinksCount"></p>
+                        <p class="text-sm text-gray-500" x-text="getTimeFilterLabel()"></p>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-orange-50 rounded-lg p-4 text-center border border-orange-100">
+                        <p class="text-sm text-orange-600 mb-1 font-medium">Today</p>
+                        <p class="text-2xl font-bold text-orange-600" x-text="todayCount"></p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 text-center border border-orange-100">
+                        <p class="text-sm text-orange-600 mb-1 font-medium">This Week</p>
+                        <p class="text-2xl font-bold text-orange-600" x-text="weekHistory.length"></p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 text-center border border-orange-100">
+                        <p class="text-sm text-orange-600 mb-1 font-medium">This Month</p>
+                        <p class="text-2xl font-bold text-orange-600" x-text="monthHistory.length"></p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 text-center border border-orange-100">
+                        <p class="text-sm text-orange-600 mb-1 font-medium">All Time</p>
+                        <p class="text-2xl font-bold text-orange-600" x-text="history.length"></p>
+                    </div>
                 </div>
             </div>
             
@@ -721,21 +849,24 @@
             </div>
             
             <!-- Empty State -->
-            <div x-show="!loading && todaysHistory.length === 0" class="text-center py-20">
+            <div x-show="!loading && filteredHistory.length === 0" class="text-center py-20">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-2xl mb-8">
                     <i class="fas fa-history text-3xl text-gray-400"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-3">No activity today</h3>
-                <p class="text-gray-600 mb-8 max-w-md mx-auto">Start browsing and your visited links will appear here automatically.</p>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="getEmptyStateTitle()"></h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto" x-text="getEmptyStateMessage()"></p>
             </div>
             
             <!-- History Grid -->
-            <div x-show="!loading && (filteredHistory.length > 0 || todaysHistory.length > 0)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <template x-for="entry in (filteredHistory.length > 0 ? filteredHistory : todaysHistory)" :key="entry.url">
-                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white transition-all duration-200">
+            <div x-show="!loading && filteredHistory.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="entry in filteredHistory" :key="entry.url">
+                    <div class="bg-white rounded-2xl p-6 border-2 transition-all duration-200"
+                         :class="activeHistoryEntry === entry.url ? 'border-blue-200 bg-gradient-to-br from-blue-50 to-white' : 'border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 mb-2 truncate" x-text="entry.title"></h3>
+                                <h3 class="font-semibold text-gray-900 mb-2 truncate cursor-pointer hover:text-blue-600 transition-colors" 
+                                   x-text="entry.title"
+                                   @click="activeHistoryEntry = entry.url"></h3>
                                 <div class="mb-2" x-data="{ expanded: false, copied: false }">
                                     <div class="flex items-center space-x-2">
                                         <p class="text-sm text-blue-600 flex-1" 
@@ -761,6 +892,17 @@
                                         <span x-text="entry.visit_count"></span> visits
                                     </span>
                                     <span x-text="new Date(entry.last_visit_time).toLocaleTimeString()"></span>
+                                </div>
+                                <!-- Source Information -->
+                                <div x-show="entry.source_url" class="mt-2 p-2 bg-orange-50 rounded-lg border-l-3 border-orange-300">
+                                    <div class="flex items-center text-xs text-orange-700">
+                                        <i class="fas fa-arrow-left mr-1"></i>
+                                        <span class="font-medium">Clicked from:</span>
+                                        <span class="ml-1 truncate" x-text="entry.source_title || 'Unknown Page'"></span>
+                                    </div>
+                                    <div x-show="entry.link_text" class="text-xs text-orange-600 mt-1">
+                                        <span x-text="'\"' + entry.link_text + '\"'"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -832,10 +974,12 @@
             <!-- Bookmarks Grid -->
             <div x-show="!loading && filteredBookmarks.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <template x-for="bookmark in filteredBookmarks" :key="bookmark.id">
-                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white transition-all duration-200 group">
+                    <div class="bg-white rounded-2xl p-6 border-2 transition-all duration-200 group"
+                         :class="activeBookmark === bookmark.id ? 'border-blue-200 bg-gradient-to-br from-blue-50 to-white' : 'border-gray-100 hover:border-blue-200 hover:bg-gradient-to-br hover:from-blue-50 hover:to-white'">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2 cursor-pointer"
+                                    @click="activeBookmark = bookmark.id">
                                     <a :href="bookmark.url" target="_blank" x-text="bookmark.title" class="hover:underline"></a>
                                 </h3>
                                 <div class="mb-3" x-data="{ expanded: false, copied: false }">
@@ -906,15 +1050,16 @@
                 <p class="text-gray-600 mb-8 max-w-md mx-auto">Collections are created automatically when you organize your bookmarks with tags.</p>
                 <button @click="showAddModal = true" 
                         class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all duration-200">
-                    <i class="fas fa-plus mr-2"></i>Create Your First Collection
+                    <i class="fas fa-plus mr-2"></i>Add Bookmark to Create Collection
                 </button>
             </div>
             
             <!-- Collections Grid -->
             <div x-show="!loading && allTags.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <template x-for="tag in allTags" :key="tag.name">
-                    <div class="bg-white rounded-2xl p-6 border-2 border-gray-100 hover:border-green-200 hover:bg-gradient-to-br hover:from-green-50 hover:to-white transition-all duration-200 group cursor-pointer"
-                         @click="selectedTag = tag.name; filterBookmarks()">
+                    <div class="bg-white rounded-2xl p-6 border-2 transition-all duration-200 group cursor-pointer"
+                         :class="activeCollection === tag.name ? 'border-green-200 bg-gradient-to-br from-green-50 to-white' : 'border-gray-100 hover:border-green-200 hover:bg-gradient-to-br hover:from-green-50 hover:to-white'"
+                         @click="viewCollection(tag.name)">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-2 mb-2 capitalize" x-text="tag.name"></h3>
@@ -937,19 +1082,19 @@
                                     </div>
                                 </div>
                             </template>
-                            <div x-show="getBookmarksByTag(tag).length > 3" class="text-xs text-gray-500 text-center py-1">
-                                +<span x-text="getBookmarksByTag(tag).length - 3"></span> more items
+                            <div x-show="tag.count > 3" class="text-xs text-gray-500 text-center py-1">
+                                +<span x-text="tag.count - 3"></span> more items
                             </div>
                         </div>
                         
                         <div class="flex items-center justify-between">
                             <div class="flex space-x-2">
-                                <button @click.stop="selectedTag = tag; filterBookmarks(); currentView = 'bookmarks'"
+                                <button @click.stop="viewCollection(tag.name)"
                                         class="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-medium transition-colors">
                                     <i class="fas fa-eye mr-1"></i>View All
                                 </button>
                             </div>
-                            <div class="text-xs text-gray-400" x-text="`${getBookmarksByTag(tag).length} items`"></div>
+                            <div class="text-xs text-gray-400" x-text="`${tag.count} items`"></div>
                         </div>
                     </div>
                 </template>
@@ -1086,10 +1231,14 @@
                 sessions: [],
                 history: [],
                 todaysHistory: [],
+                weekHistory: [],
+                monthHistory: [],
                 filteredBookmarks: [],
                 filteredSessions: [],
                 filteredHistory: [],
                 allTags: [],
+                totalLinksCount: 0,
+                timeFilter: 'all',
                 
                 // UI State
                 loading: true,
@@ -1098,6 +1247,9 @@
                 showExtensionModal: false,
                 editingBookmark: null,
                 extensionInstalled: false,
+                welcomeDismissed: localStorage.getItem('hyprlink-welcome-dismissed') === 'true',
+                showExtensionHelp: false,
+                extensionConnected: false,
                 
                 // Form
                 bookmarkForm: {
@@ -1128,6 +1280,11 @@
                 
                 // View State
                 currentView: 'all', // 'all', 'bookmarks', 'sessions', 'collections', 'recent'
+                activeHistoryEntry: null, // Track active history card
+                activeBookmark: null, // Track active bookmark card
+                activeCollection: null, // Track active collection card
+                activeSession: null, // Track active session card
+                activeMainCard: null, // Track active main overview card
                 
                 // Computed
                 get todayCount() {
@@ -1139,9 +1296,19 @@
                     await this.loadBookmarks();
                     await this.loadSessions();
                     await this.loadTodaysHistory();
+                    // Load statistics data for the History tab
+                    await this.loadWeekHistory();
+                    await this.loadMonthHistory();
+                    await this.loadAllHistory();
+                    // Initialize the counter based on default timeFilter (today)
+                    this.timeFilter = 'today'; // Set default to today
+                    this.totalLinksCount = this.todaysHistory.length;
+                    // Initialize filtered history with today's data
+                    this.filterHistoryByTime();
                     this.updateAllTags();
                     this.filterBookmarks();
                     this.filterSessions();
+                    this.checkWelcomeStatus();
                     this.checkExtension();
                     this.loading = false;
                 },
@@ -1181,6 +1348,184 @@
                         console.error('Error loading today\'s history:', error);
                         this.todaysHistory = [];
                         this.filteredHistory = [];
+                    }
+                },
+
+                async loadTotalLinksCount() {
+                    try {
+                        const response = await fetch('/api/history/count');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.totalLinksCount = data.total_count || 0;
+                        }
+                    } catch (error) {
+                        console.error('Error loading total links count:', error);
+                        this.totalLinksCount = 0;
+                    }
+                },
+
+                async loadWeekHistory() {
+                    try {
+                        const response = await fetch('/api/history/week');
+                        if (response.ok) {
+                            this.weekHistory = await response.json() || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading week history:', error);
+                        this.weekHistory = [];
+                    }
+                },
+
+                async loadMonthHistory() {
+                    try {
+                        const response = await fetch('/api/history/month');
+                        if (response.ok) {
+                            this.monthHistory = await response.json() || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading month history:', error);
+                        this.monthHistory = [];
+                    }
+                },
+
+                async loadAllHistory() {
+                    try {
+                        const response = await fetch('/api/history');
+                        if (response.ok) {
+                            this.history = await response.json() || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading all history:', error);
+                        this.history = [];
+                    }
+                },
+
+                async setTimeFilter(filter) {
+                    this.timeFilter = filter;
+                    
+                    // Save timeFilter to localStorage for persistence
+                    localStorage.setItem('hyprlink_timeFilter', filter);
+                    
+                    // Load data for the selected filter if not already loaded and update count
+                    switch(filter) {
+                        case 'week':
+                            if (this.weekHistory.length === 0) {
+                                await this.loadWeekHistory();
+                            }
+                            this.totalLinksCount = this.weekHistory.length;
+                            break;
+                        case 'month':
+                            if (this.monthHistory.length === 0) {
+                                await this.loadMonthHistory();
+                            }
+                            this.totalLinksCount = this.monthHistory.length;
+                            break;
+                        case 'all':
+                            if (this.history.length === 0) {
+                                await this.loadAllHistory();
+                            }
+                            // Use actual history length instead of API call for consistency
+                            this.totalLinksCount = this.history.length;
+                            break;
+                        default:
+                            // Default to all time
+                            if (this.history.length === 0) {
+                                await this.loadAllHistory();
+                            }
+                            this.totalLinksCount = this.history.length;
+                            break;
+                    }
+                    
+                    // Always apply filtering to update the filteredHistory array
+                    // This ensures search works correctly with the selected time filter
+                    this.filterHistoryByTime();
+                },
+
+                getTimeFilterLabel() {
+                    const labels = {
+                        'today': 'links today',
+                        'week': 'links this week', 
+                        'month': 'links this month',
+                        'all': 'total links'
+                    };
+                    return labels[this.timeFilter] || 'links';
+                },
+
+                getHistoryTitle() {
+                    const titles = {
+                        'week': 'This Week\'s Visited Links',
+                        'month': 'This Month\'s Visited Links', 
+                        'all': 'All Visited Links'
+                    };
+                    return titles[this.timeFilter] || 'Today\'s Visited Links';
+                },
+
+                getFilteredHistoryCount() {
+                    return this.filteredHistory.length;
+                },
+
+                getStatisticsDescription() {
+                    const descriptions = {
+                        'today': 'Your browsing activity for today',
+                        'week': 'Your browsing activity for this week',
+                        'month': 'Your browsing activity for this month',
+                        'all': 'Your complete browsing history'
+                    };
+                    return descriptions[this.timeFilter] || 'Your browsing statistics';
+                },
+
+                getEmptyStateTitle() {
+                    const titles = {
+                        'today': 'No activity today',
+                        'week': 'No activity this week',
+                        'month': 'No activity this month',
+                        'all': 'No browsing history'
+                    };
+                    return titles[this.timeFilter] || 'No activity';
+                },
+
+                getEmptyStateMessage() {
+                    const messages = {
+                        'today': 'Start browsing and your visited links will appear here automatically.',
+                        'week': 'No links were visited this week. Start browsing to see your activity.',
+                        'month': 'No links were visited this month. Start browsing to see your activity.',
+                        'all': 'No browsing history found. Your visited links will appear here as you browse.'
+                    };
+                    return messages[this.timeFilter] || 'Start browsing to see your activity here.';
+                },
+
+                viewTotalLinks() {
+                    // Navigate to recent view with current time filter
+                    this.setView('recent');
+                    // Apply the current time filter to the recent view
+                    this.filterHistoryByTime();
+                },
+
+                filterHistoryByTime() {
+                    let historyToFilter = [];
+                    
+                    switch(this.timeFilter) {
+                        case 'today':
+                            historyToFilter = this.todaysHistory;
+                            break;
+                        case 'week':
+                            historyToFilter = this.weekHistory;
+                            break;
+                        case 'month':
+                            historyToFilter = this.monthHistory;
+                            break;
+                        case 'all':
+                        default:
+                            historyToFilter = this.history; // All history
+                            break;
+                    }
+                    
+                    this.filteredHistory = [...historyToFilter];
+                    
+                    // Apply search filter if active
+                    if (this.globalSearchQuery && this.globalSearchQuery.length >= 1) {
+                        const searchFields = ['title', 'url'];
+                        this.filteredHistory = this.fuzzySearchItems(this.filteredHistory, this.globalSearchQuery, searchFields);
                     }
                 },
                 
@@ -1433,6 +1778,7 @@
                             if (chrome.runtime.id) {
                                 // We're running in extension context
                                 this.extensionInstalled = true;
+                                this.extensionConnected = true;
                                 console.log('Running in extension context');
                                 return;
                             }
@@ -1453,6 +1799,7 @@
                         const responseHandler = (event) => {
                             if (event.detail && event.detail.extensionInstalled) {
                                 this.extensionInstalled = true;
+                                this.extensionConnected = true;
                                 console.log('Extension detected via custom event');
                             }
                             window.removeEventListener('hyprlink-extension-response', responseHandler);
@@ -1472,6 +1819,26 @@
                         this.extensionInstalled = false;
                         console.log('Chrome runtime not available');
                     }
+                },
+                
+                checkWelcomeStatus() {
+                    // Check if user has previously dismissed the welcome card
+                    const dismissed = localStorage.getItem('hyprlink-welcome-dismissed');
+                    this.welcomeDismissed = dismissed === 'true';
+                    
+                    // Update extension connection status
+                    this.extensionConnected = this.extensionInstalled;
+                },
+                
+                dismissWelcome() {
+                    this.welcomeDismissed = true;
+                    localStorage.setItem('hyprlink-welcome-dismissed', 'true');
+                },
+                
+                resetWelcome() {
+                    // For debugging - allows resetting the welcome card
+                    this.welcomeDismissed = false;
+                    localStorage.removeItem('hyprlink-welcome-dismissed');
                 },
                 
                 saveCurrentSession() {
@@ -1678,8 +2045,31 @@
                     this.filterSessions();
                 },
                 
+                viewCollection(tagName) {
+                    // Set collection state first
+                    this.activeCollection = tagName;
+                    this.selectedTag = tagName;
+                    
+                    // Change view without clearing selectedTag
+                    this.currentView = 'bookmarks';
+                    
+                    // Clear other active states but preserve collection state
+                    this.activeHistoryEntry = null;
+                    this.activeBookmark = null;
+                    this.activeSession = null;
+                    
+                    // Filter bookmarks for this collection
+                    this.filterBookmarks();
+                },
+                
                 setView(view) {
                     this.currentView = view;
+                    // Clear all active states when switching views/tabs
+                    this.activeHistoryEntry = null;
+                    this.activeBookmark = null;
+                    this.activeCollection = null;
+                    this.activeSession = null;
+                    // Don't clear activeMainCard here - let it persist to show which section is active
                     
                     // Apply view-specific filters
                     switch (view) {
@@ -1692,10 +2082,19 @@
                             // Show recent bookmarks (today)
                             this.selectedTag = '';
                             this.searchQuery = '';
+                            // Don't clear globalSearchQuery - let user keep their search when switching views
                             this.sortBy = 'created_desc';
+                            // Set default sort for history to newest first
+                            this.globalSortBy = 'time_desc';
+                            // Initialize the filtered history based on current time filter
+                            this.filterHistoryByTime();
                             break;
                         case 'bookmarks':
-                            this.selectedTag = '';
+                            // Don't clear selectedTag if we're coming from a collection
+                            // Only clear it if it's a general bookmarks view
+                            if (!this.activeCollection) {
+                                this.selectedTag = '';
+                            }
                             this.searchQuery = '';
                             break;
                         case 'sessions':
@@ -1706,7 +2105,10 @@
                             break;
                     }
                     
-                    this.filterBookmarks();
+                    // Only auto-filter if not preserving collection state
+                    if (view !== 'bookmarks' || !this.activeCollection) {
+                        this.filterBookmarks();
+                    }
                     this.filterSessions();
                 },
                 
@@ -1715,7 +2117,7 @@
                         'bookmarks': 'Bookmarks View',
                         'sessions': 'Sessions View',
                         'collections': 'Collections View',
-                        'recent': 'Today\'s Links'
+                        'recent': 'History View'
                     };
                     return titles[this.currentView] || 'Overview';
                 },
@@ -1725,7 +2127,7 @@
                         'bookmarks': 'bg-blue-50',
                         'sessions': 'bg-purple-50',
                         'collections': 'bg-green-50',
-                        'recent': 'bg-gradient-to-r from-blue-50 to-purple-50'
+                        'recent': 'bg-orange-50'
                     };
                     return classes[this.currentView] || 'bg-gray-50';
                 },
@@ -1735,7 +2137,7 @@
                         'bookmarks': 'bg-blue-500',
                         'sessions': 'bg-purple-500',
                         'collections': 'bg-green-500',
-                        'recent': 'bg-gradient-to-r from-blue-500 to-purple-500'
+                        'recent': 'bg-orange-500'
                     };
                     return classes[this.currentView] || 'bg-gray-500';
                 },
@@ -1745,7 +2147,7 @@
                         'bookmarks': 'text-blue-700',
                         'sessions': 'text-purple-700',
                         'collections': 'text-green-700',  
-                        'recent': 'text-blue-700'
+                        'recent': 'text-orange-700'
                     };
                     return classes[this.currentView] || 'text-gray-700';
                 },
@@ -1903,16 +2305,8 @@
                 },
 
                 filterHistory() {
-                    let filtered = [...this.todaysHistory];
-                    
-                    // Fuzzy search for history
-                    if (this.globalSearchQuery && this.globalSearchQuery.length >= 1) {
-                        const searchFields = ['title', 'url'];
-                        filtered = this.fuzzySearchItems(filtered, this.globalSearchQuery, searchFields);
-                    }
-                    
-                    // Update the display array (we'll need to create a filtered version)
-                    this.filteredHistory = filtered;
+                    // Use the time-based filtering method
+                    this.filterHistoryByTime();
                     this.sortHistory();
                 },
 
