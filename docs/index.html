@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyprLnk - Self-Hosted Session Management & Smart Bookmarks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .code-bg {
+            background: linear-gradient(45deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        @keyframes terminal-cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .cursor {
+            animation: terminal-cursor 1s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="{ showInstallSteps: false }">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-bookmark text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">HyprLnk</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+                    <a href="#setup" class="text-gray-600 hover:text-gray-900 transition-colors">Setup</a>
+                    <a href="./api-docs.html" class="text-gray-600 hover:text-gray-900 transition-colors">API</a>
+                    <a href="#docs" class="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
+                    <a href="https://github.com/a-kar/HyprLnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+                        <i class="fab fa-github mr-2"></i>View on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                    <i class="fas fa-open-source-initiative mr-2"></i>
+                    Open Source • Self-Hosted • Privacy First
+                </div>
+                <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+                    Session management, <span class="gradient-text">reimagined</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
+                    Self-hosted browser session and bookmark management that puts you in control. 
+                    Save and restore entire browsing sessions instantly. Built with Go, designed for homelabs, perfect for privacy-conscious developers.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <a href="https://github.com/a-kar/HyprLnk/releases" class="px-8 py-4 hero-gradient text-white rounded-xl text-lg font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                        <i class="fas fa-download mr-2"></i>Download Latest
+                    </a>
+                    <button @click="showInstallSteps = true" class="px-8 py-4 bg-white border-2 border-gray-300 text-gray-900 rounded-xl text-lg font-semibold hover:border-gray-400 transition-all flex items-center justify-center">
+                        <i class="fas fa-terminal mr-2"></i>Quick Install
+                    </button>
+                </div>
+                
+                <!-- GitHub Stars Badge -->
+                <div class="flex justify-center space-x-4">
+                    <a href="https://github.com/a-kar/HyprLnk" class="inline-flex items-center bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i class="fab fa-github mr-2"></i>
+                        <span class="font-medium">Star on GitHub</span>
+                        <span class="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">⭐ 127</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Terminal Demo -->
+            <div class="max-w-5xl mx-auto">
+                <div class="code-bg rounded-2xl shadow-2xl border border-gray-800 overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 bg-gray-800 border-b border-gray-700">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+                        <span class="text-gray-300 text-sm font-mono">~/hyprlnk</span>
+                    </div>
+                    <div class="p-6 font-mono text-green-400 text-lg leading-relaxed">
+                        <div class="mb-2">$ git clone https://github.com/a-kar/hyprlnk.git</div>
+                        <div class="mb-2">$ cd hyprlnk</div>
+                        <div class="mb-2">$ docker-compose up -d</div>
+                        <div class="mb-4 text-gray-400">✓ HyprLnk running at http://localhost:4381</div>
+                        <div class="text-blue-400">🚀 Ready to save and restore your browser sessions!<span class="cursor">_</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-12">Built with modern tech stack</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="flex flex-col items-center">
+                    <i class="fab fa-golang text-6xl text-blue-500 mb-4"></i>
+                    <span class="font-semibold text-gray-900">Go Backend</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fab fa-docker text-6xl text-blue-600 mb-4"></i>
+                    <span class="font-semibold text-gray-900">Docker Ready</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-database text-6xl text-green-600 mb-4"></i>
+                    <span class="font-semibold text-gray-900">Apache Parquet</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fab fa-js-square text-6xl text-yellow-500 mb-4"></i>
+                    <span class="font-semibold text-gray-900">Alpine.js UI</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    Everything you need, nothing you don't
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Built for developers who care about privacy, performance, and simplicity.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Privacy First -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-shield-alt text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Privacy First</h3>
+                    <p class="text-gray-600">Your data never leaves your server. No tracking, no analytics, no third parties.</p>
+                </div>
+                
+                <!-- Self-Hosted -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-server text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Self-Hosted</h3>
+                    <p class="text-gray-600">Run on your homelab, VPS, or Raspberry Pi. Full control over your data and infrastructure.</p>
+                </div>
+                
+                <!-- Lightweight -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-feather-alt text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Lightweight</h3>
+                    <p class="text-gray-600">Single binary, minimal dependencies, runs on 50MB RAM. Perfect for resource-constrained environments.</p>
+                </div>
+                
+                <!-- AI-Powered -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-robot text-orange-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">AI Organization</h3>
+                    <p class="text-gray-600">Optional AI categorization using local models or your preferred API. Always your choice.</p>
+                </div>
+                
+                <!-- API First -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-code text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">API First</h3>
+                    <p class="text-gray-600">RESTful API for integrations. Build your own tools, automate workflows, sync with other apps.</p>
+                </div>
+                
+                <!-- Docker & Portainer -->
+                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
+                    <div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-docker text-cyan-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Container Ready</h3>
+                    <p class="text-gray-600">Docker Compose included. Deploy to Portainer, Kubernetes, or any container platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setup Section -->
+    <section id="setup" class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                    Deploy in minutes
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Multiple deployment options for every setup
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Docker Compose -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fab fa-docker text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Docker Compose</h3>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
+                        <div>git clone https://github.com/</div>
+                        <div>a-kar/HyprLnk.git</div>
+                        <div>docker-compose up -d</div>
+                    </div>
+                    <p class="text-gray-600 text-sm">Perfect for homelabs and development</p>
+                </div>
+                
+                <!-- Portainer -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-cube text-purple-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Portainer Stack</h3>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
+                        <div>1. Create new stack</div>
+                        <div>2. Paste docker-compose.yml</div>
+                        <div>3. Deploy</div>
+                    </div>
+                    <p class="text-gray-600 text-sm">GUI-based container management</p>
+                </div>
+                
+                <!-- Binary -->
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-download text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Binary</h3>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
+                        <div>wget latest-release.tar.gz</div>
+                        <div>tar -xzf HyprLnk.tar.gz</div>
+                        <div>./HyprLnk</div>
+                    </div>
+                    <p class="text-gray-600 text-sm">Single binary, no dependencies</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation -->
+    <section id="docs" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Comprehensive Documentation</h2>
+                <p class="text-xl text-gray-600">Everything you need to get started and customize Hyprlink</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-rocket text-blue-600"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-2">Quick Start</h3>
+                    <p class="text-gray-600 text-sm">Get up and running in 5 minutes</p>
+                </a>
+                
+                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-cog text-green-600"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-2">Configuration</h3>
+                    <p class="text-gray-600 text-sm">Environment variables and settings</p>
+                </a>
+                
+                <a href="./api-docs.html" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-code text-purple-600"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-2">API Reference</h3>
+                    <p class="text-gray-600 text-sm">RESTful API documentation</p>
+                </a>
+                
+                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-puzzle-piece text-orange-600"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 mb-2">Extensions</h3>
+                    <p class="text-gray-600 text-sm">Browser extension setup guide</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community & Contributing -->
+    <section class="py-20 px-4 bg-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-gray-900 mb-8">Join the Community</h2>
+            <p class="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+                Built by developers, for developers. Contribute, report issues, or just say hi!
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <a href="https://github.com/a-kar/HyprLnk" class="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all">
+                    <div class="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-github text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">GitHub</h3>
+                    <p class="text-gray-600">Star the repo, report issues, contribute code</p>
+                </a>
+                
+                <a href="#" class="group bg-blue-50 rounded-2xl p-8 hover:bg-blue-100 transition-all">
+                    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-discord text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Discord</h3>
+                    <p class="text-gray-600">Chat with other users, get help, share tips</p>
+                </a>
+                
+                <a href="#" class="group bg-orange-50 rounded-2xl p-8 hover:bg-orange-100 transition-all">
+                    <div class="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-reddit text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">r/selfhosted</h3>
+                    <p class="text-gray-600">Discuss with the self-hosting community</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Install Modal -->
+    <div x-show="showInstallSteps" x-cloak class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         @click.self="showInstallSteps = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-auto">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Quick Install Options</h2>
+                    <button @click="showInstallSteps = false" 
+                            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Docker Compose -->
+                    <div class="border border-gray-200 rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fab fa-docker text-blue-600 mr-3"></i>
+                            Docker Compose (Recommended)
+                        </h3>
+                        <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
+                            <div class="mb-2"># Clone the repository</div>
+                            <div class="mb-2">git clone https://github.com/a-kar/HyprLnk.git</div>
+                            <div class="mb-2">cd HyprLnk</div>
+                            <div class="mb-4"></div>
+                            <div class="mb-2"># Start the services</div>
+                            <div class="mb-2">docker-compose up -d</div>
+                            <div class="mb-4"></div>
+                            <div class="text-blue-400"># Access at http://localhost:4381</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Portainer -->
+                    <div class="border border-gray-200 rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-cube text-purple-600 mr-3"></i>
+                            Portainer Stack
+                        </h3>
+                        <ol class="list-decimal list-inside text-gray-700 space-y-2">
+                            <li>Open Portainer and go to "Stacks"</li>
+                            <li>Click "Add stack"</li>
+                            <li>Paste the docker-compose.yml content</li>
+                            <li>Click "Deploy the stack"</li>
+                            <li>Access at http://your-server:4381</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <a href="https://github.com/a-kar/HyprLnk" 
+                       class="px-6 py-3 hero-gradient text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                        View Full Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold">HyprLnk</span>
+                    </div>
+                    <p class="text-gray-400">Self-hosted link management for developers who care about privacy.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Project</h4>
+                    <ul class="space-y-2">
+                        <li><a href="https://github.com/a-kar/HyprLnk" class="text-gray-400 hover:text-white">GitHub</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Releases</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Roadmap</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contributing</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Documentation</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Quick Start</a></li>
+                        <li><a href="./api-docs.html" class="text-gray-400 hover:text-white">API Reference</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Configuration</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Extensions</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-white mb-4">Community</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Discord</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">r/selfhosted</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Issues</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Discussions</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">© 2025 HyprLnk. Licensed under BSL 1.1 - see LICENSE for details.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="https://github.com/a-kar/HyprLnk" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-discord text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-reddit text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

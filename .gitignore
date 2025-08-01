@@ -1,0 +1,70 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+hyprlink
+/backend/hyprlink
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Data files
+data/
+*.parquet
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+backup/
+backups/
+
+# Build directories
+dist/
+build/
+
+# Docker volumes
+docker-volumes/
+
+# Node modules (if any frontend build tools are added)
+node_modules/
+
+# Debug files
+debug.html
+debug-simple.html
+*-debug.html
