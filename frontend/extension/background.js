@@ -1,10 +1,18 @@
 const API_BASE = 'http://localhost:4381/api';
+const DEBUG_MODE = false; // Set to true for development logging - shows URL tracking and sync events
 
-console.log('[HyprLnk] Background script loaded, API_BASE:', API_BASE);
+// Debug logging helper
+function debugLog(message, ...args) {
+  if (DEBUG_MODE) {
+    debugLog(message, ...args);
+  }
+}
+
+debugLog('[HyprLnk] Background script loaded, API_BASE:', API_BASE);
 
 // Context menu setup
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[HyprLnk] Extension installed/reloaded - setting up...');
+  debugLog('[HyprLnk] Extension installed/reloaded - setting up...');
   
   chrome.contextMenus.create({
     id: 'saveBookmark',
@@ -19,7 +27,7 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 
   // Start periodic history sync
-  console.log('[HyprLnk] Starting history sync system...');
+  debugLog('[HyprLnk] Starting history sync system...');
   startHistorySync();
 });
 
@@ -50,7 +58,7 @@ async function saveBookmark(tab) {
     });
 
     if (response.ok) {
-      console.log('Bookmark saved successfully:', bookmark.title);
+      debugLog('Bookmark saved successfully:', bookmark.title);
     }
   } catch (error) {
     console.error('Error saving bookmark:', error);
@@ -83,7 +91,7 @@ async function saveCurrentSession() {
     });
 
     if (response.ok) {
-      console.log(`Session saved successfully: ${sessionTabs.length} tabs`);
+      debugLog(`Session saved successfully: ${sessionTabs.length} tabs`);
     }
   } catch (error) {
     console.error('Error saving session:', error);
@@ -117,7 +125,7 @@ async function saveCurrentSessionWithName(sessionName) {
 
     if (response.ok) {
       const result = await response.json();
-      console.log(`Session "${sessionName}" saved successfully: ${sessionTabs.length} tabs`);
+      debugLog(`Session "${sessionName}" saved successfully: ${sessionTabs.length} tabs`);
       return { message: `Session "${sessionName}" saved with ${sessionTabs.length} tabs`, session: result };
     } else {
       throw new Error(`Failed to save session: ${response.status} ${response.statusText}`);
@@ -130,50 +138,50 @@ async function saveCurrentSessionWithName(sessionName) {
 
 // History sync functionality
 function startHistorySync() {
-  console.log('[HyprLnk] Setting up automatic sync listeners...');
+  debugLog('[HyprLnk] Setting up automatic sync listeners...');
   
   // Sync immediately
   syncTodaysHistory();
   
   // Set up periodic sync every 10 minutes
-  console.log('[HyprLnk] Setting up 10-minute periodic sync...');
+  debugLog('[HyprLnk] Setting up 10-minute periodic sync...');
   setInterval(() => {
-    console.log('[HyprLnk] Periodic sync triggered (10 minutes)');
+    debugLog('[HyprLnk] Periodic sync triggered (10 minutes)');
     syncTodaysHistory();
   }, 10 * 60 * 1000);
   
   // Also sync when user becomes active
-  console.log('[HyprLnk] Setting up idle state listener...');
+  debugLog('[HyprLnk] Setting up idle state listener...');
   chrome.idle.onStateChanged.addListener((newState) => {
-    console.log('[HyprLnk] Idle state changed to:', newState);
+    debugLog('[HyprLnk] Idle state changed to:', newState);
     if (newState === 'active') {
-      console.log('[HyprLnk] User became active, syncing history');
+      debugLog('[HyprLnk] User became active, syncing history');
       syncTodaysHistory();
     }
   });
   
   // Sync when tabs are updated (new page visits)
-  console.log('[HyprLnk] Setting up tab update listener...');
+  debugLog('[HyprLnk] Setting up tab update listener...');
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log('[HyprLnk] Tab updated:', tabId, changeInfo, tab?.url);
+    debugLog('[HyprLnk] Tab updated:', tabId, changeInfo, tab?.url);
     if (changeInfo.status === 'complete' && tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
-      console.log('[HyprLnk] Page loaded, scheduling sync:', tab.url);
+      debugLog('[HyprLnk] Page loaded, scheduling sync:', tab.url);
       // Use debounced sync to prevent multiple rapid syncs
       debouncedSync();
     }
   });
   
   // Also sync on navigation completed
-  console.log('[HyprLnk] Setting up navigation listener...');
+  debugLog('[HyprLnk] Setting up navigation listener...');
   chrome.webNavigation.onCompleted.addListener((details) => {
-    console.log('[HyprLnk] Navigation event:', details.frameId, details.url);
+    debugLog('[HyprLnk] Navigation event:', details.frameId, details.url);
     if (details.frameId === 0) { // Main frame only
-      console.log('[HyprLnk] Navigation completed, scheduling sync:', details.url);
+      debugLog('[HyprLnk] Navigation completed, scheduling sync:', details.url);
       debouncedSync();
     }
   });
   
-  console.log('[HyprLnk] All sync listeners set up successfully');
+  debugLog('[HyprLnk] All sync listeners set up successfully');
 }
 
 // Debounced sync to prevent multiple rapid syncs
@@ -185,7 +193,7 @@ function debouncedSync() {
   
   // Schedule new sync with 3 second delay
   pendingSyncTimeout = setTimeout(() => {
-    console.log('[HyprLnk] Debounced sync executing...');
+    debugLog('[HyprLnk] Debounced sync executing...');
     syncTodaysHistory();
     pendingSyncTimeout = null;
   }, 3000);
@@ -194,17 +202,17 @@ function debouncedSync() {
 async function syncTodaysHistory() {
   // Prevent concurrent syncs
   if (isSyncing) {
-    console.log('[HyprLnk] Sync already in progress, skipping...');
+    debugLog('[HyprLnk] Sync already in progress, skipping...');
     return;
   }
   
   try {
     isSyncing = true;
-    console.log('[HyprLnk] Starting history sync...');
+    debugLog('[HyprLnk] Starting history sync...');
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     
-    console.log(`[HyprLnk] Searching history from: ${new Date(startOfDay).toISOString()}`);
+    debugLog(`[HyprLnk] Searching history from: ${new Date(startOfDay).toISOString()}`);
     
     const historyItems = await chrome.history.search({
       text: '',
@@ -212,7 +220,7 @@ async function syncTodaysHistory() {
       maxResults: 1000
     });
 
-    console.log(`[HyprLnk] Found ${historyItems.length} history items from Chrome`);
+    debugLog(`[HyprLnk] Found ${historyItems.length} history items from Chrome`);
 
     // Filter and format history for today
     const todaysHistory = historyItems
@@ -224,10 +232,10 @@ async function syncTodaysHistory() {
         last_visit_time: new Date(item.lastVisitTime).toISOString()
       }));
 
-    console.log(`[HyprLnk] Filtered to ${todaysHistory.length} entries for today`);
+    debugLog(`[HyprLnk] Filtered to ${todaysHistory.length} entries for today`);
 
     if (todaysHistory.length > 0) {
-      console.log('[HyprLnk] Syncing history to backend...');
+      debugLog('[HyprLnk] Syncing history to backend...');
       const response = await fetch(`${API_BASE}/history/sync`, {
         method: 'POST',
         headers: {
@@ -240,12 +248,12 @@ async function syncTodaysHistory() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log(`[HyprLnk] History synced successfully: ${result.synced_count} entries`);
+        debugLog(`[HyprLnk] History synced successfully: ${result.synced_count} entries`);
       } else {
         console.error('[HyprLnk] History sync failed:', response.status, response.statusText);
       }
     } else {
-      console.log('[HyprLnk] No history to sync for today');
+      debugLog('[HyprLnk] No history to sync for today');
     }
   } catch (error) {
     console.error('[HyprLnk] Error syncing history:', error);
@@ -289,7 +297,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'triggerSync') {
-    console.log('[HyprLnk] Manual sync triggered from content script');
+    debugLog('[HyprLnk] Manual sync triggered from content script');
     syncTodaysHistory();
     sendResponse({ success: true });
     return true;
@@ -366,7 +374,7 @@ async function restoreSession(session) {
 function handleLinkClicks(clicks) {
   // Add clicks to buffer
   linkClickBuffer.push(...clicks);
-  console.log(`[HyprLnk] Received ${clicks.length} link clicks, buffer size: ${linkClickBuffer.length}`);
+  debugLog(`[HyprLnk] Received ${clicks.length} link clicks, buffer size: ${linkClickBuffer.length}`);
   
   // Sync if buffer is getting large or periodically
   if (linkClickBuffer.length >= 10) {
@@ -393,7 +401,7 @@ async function syncLinkClicks() {
 
     if (response.ok) {
       const result = await response.json();
-      console.log(`[HyprLnk] Link clicks synced: ${result.synced_count || clicksToSync.length} entries`);
+      debugLog(`[HyprLnk] Link clicks synced: ${result.synced_count || clicksToSync.length} entries`);
     } else {
       // Put clicks back in buffer if sync failed
       linkClickBuffer.unshift(...clicksToSync);
@@ -409,13 +417,13 @@ async function syncLinkClicks() {
 // Periodic sync of link clicks
 setInterval(() => {
   if (linkClickBuffer.length > 0) {
-    console.log('[HyprLnk] Periodic sync of link clicks');
+    debugLog('[HyprLnk] Periodic sync of link clicks');
     syncLinkClicks();
   }
 }, 5 * 60 * 1000); // Every 5 minutes
 
 // Sync on extension startup
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[HyprLnk] Extension startup - syncing any buffered link clicks');
+  debugLog('[HyprLnk] Extension startup - syncing any buffered link clicks');
   syncLinkClicks();
 });

@@ -1,28 +1,37 @@
-// HyprLnk Link Tracker v1.1 - Debug Version
-console.log('[HyprLnk] Link tracker v1.1 loaded on:', window.location.href);
+// HyprLnk Link Tracker v1.1
+const DEBUG_MODE = false; // Set to true for development logging - shows click tracking and URL data
+
+// Debug logging helper
+function debugLog(message, ...args) {
+  if (DEBUG_MODE) {
+    debugLog(message, ...args);
+  }
+}
+
+debugLog('[HyprLnk] Link tracker v1.1 loaded on:', window.location.href);
 
 // Immediate test - this should appear in console
 setTimeout(() => {
-    console.log('[HyprLnk] Delayed initialization test');
+    debugLog('[HyprLnk] Delayed initialization test');
 }, 100);
 
 // Check if we're in the right context
 if (window === window.top) {
-    console.log('[HyprLnk] Running in main frame');
+    debugLog('[HyprLnk] Running in main frame');
 } else {
-    console.log('[HyprLnk] Running in iframe/frame');
+    debugLog('[HyprLnk] Running in iframe/frame');
 }
 
 // Chrome extension API check
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-    console.log('[HyprLnk] Chrome extension API available, ID:', chrome.runtime.id);
+    debugLog('[HyprLnk] Chrome extension API available, ID:', chrome.runtime.id);
 } else {
-    console.log('[HyprLnk] Chrome extension API NOT available');
+    debugLog('[HyprLnk] Chrome extension API NOT available');
 }
 
 // Add click listener
 function handleClick(event) {
-    console.log('[HyprLnk] RAW CLICK on:', event.target.tagName, event.target);
+    debugLog('[HyprLnk] RAW CLICK on:', event.target.tagName, event.target);
     
     // Find the anchor element
     let link = event.target;
@@ -33,7 +42,7 @@ function handleClick(event) {
     }
     
     if (link && link.tagName === 'A' && link.href) {
-        console.log('[HyprLnk] LINK FOUND:', {
+        debugLog('[HyprLnk] LINK FOUND:', {
             href: link.href,
             text: link.textContent?.trim(),
             target: link.target
@@ -45,7 +54,7 @@ function handleClick(event) {
             link.href.startsWith('tel:') ||
             link.href === '#' ||
             link.href.endsWith('#')) {
-            console.log('[HyprLnk] Skipping special link:', link.href);
+            debugLog('[HyprLnk] Skipping special link:', link.href);
             return;
         }
         
@@ -61,7 +70,7 @@ function handleClick(event) {
             isNewTab: event.ctrlKey || event.metaKey || link.target === '_blank'
         };
         
-        console.log('[HyprLnk] TRACKING CLICK:', clickData);
+        debugLog('[HyprLnk] TRACKING CLICK:', clickData);
         
         // Send to background script
         if (chrome && chrome.runtime && chrome.runtime.sendMessage) {
@@ -72,17 +81,17 @@ function handleClick(event) {
                 if (chrome.runtime.lastError) {
                     console.error('[HyprLnk] Send error:', chrome.runtime.lastError.message);
                 } else {
-                    console.log('[HyprLnk] Send success:', response);
+                    debugLog('[HyprLnk] Send success:', response);
                 }
             });
         } else {
             console.error('[HyprLnk] Cannot send message - chrome.runtime not available');
         }
     } else {
-        console.log('[HyprLnk] No link found, clicked on:', event.target.tagName);
+        debugLog('[HyprLnk] No link found, clicked on:', event.target.tagName);
     }
 }
 
 // Attach listener
 document.addEventListener('click', handleClick, true);
-console.log('[HyprLnk] Click listener attached to document');
+debugLog('[HyprLnk] Click listener attached to document');
