@@ -67,4 +67,5 @@ node_modules/
 # Debug files
 debug.html
 debug-simple.html
-*-debug.html
+*-debug.html.claude/
+.claude/
