@@ -34,6 +34,36 @@
     </script>
     
     <style>
+        /* HyprLnk Color Palette */
+        :root {
+            /* Primary Brand Colors */
+            --hyprlnk-primary: #6366f1;
+            --hyprlnk-primary-dark: #4338ca;
+            --hyprlnk-primary-light: #eef2ff;
+            
+            /* Accent Colors */
+            --hyprlnk-blue: #3b82f6;
+            --hyprlnk-blue-dark: #1d4ed8;
+            --hyprlnk-purple: #8b5cf6;
+            --hyprlnk-purple-dark: #7c3aed;
+            --hyprlnk-purple-light: #e9d5ff;
+            --hyprlnk-green: #10b981;
+            --hyprlnk-green-dark: #059669;
+            --hyprlnk-orange: #f97316;
+            --hyprlnk-orange-dark: #ea580c;
+            
+            /* Background Colors */
+            --hyprlnk-bg-light: #f8fafc;
+            --hyprlnk-bg-lighter: #f1f5f9;
+            
+            /* Glass Effect Colors */
+            --hyprlnk-glass-bg: rgba(255, 255, 255, 0.2);
+            --hyprlnk-glass-border: rgba(255, 255, 255, 0.3);
+            
+            /* Logo Gradient */
+            --hyprlnk-logo-gradient: linear-gradient(135deg, var(--hyprlnk-primary) 0%, var(--hyprlnk-primary-dark) 100%);
+        }
+        
         [x-cloak] { display: none !important; }
         
         /* Prevent layout shift when scrollbar appears/disappears */
@@ -149,16 +179,24 @@
                 opacity: 0.8;
             }
         }
+        
+        /* Modern Aero Glass Effect */
+        .glassmorphism {
+            background: var(--hyprlnk-glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+            border-bottom: 1px solid var(--hyprlnk-glass-border) !important;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 min-h-screen font-sans antialiased" x-data="hyprlink()" x-init="init()">
     <!-- Navigation Header -->
-    <nav class="sticky top-0 z-50 bg-white/75 backdrop-blur-md border-b border-gray-200">
+    <nav class="sticky top-0 z-50 glassmorphism">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: var(--hyprlnk-logo-gradient);">
                         <i class="fas fa-link text-white text-sm"></i>
                     </div>
                     <div>

@@ -8,15 +8,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        /* HyprLnk Color Palette */
+        :root {
+            /* Primary Brand Colors */
+            --hyprlnk-primary: #6366f1;
+            --hyprlnk-primary-dark: #4338ca;
+            --hyprlnk-primary-light: #eef2ff;
+            
+            /* Accent Colors */
+            --hyprlnk-blue: #3b82f6;
+            --hyprlnk-blue-dark: #1d4ed8;
+            --hyprlnk-purple: #8b5cf6;
+            --hyprlnk-purple-dark: #7c3aed;
+            --hyprlnk-purple-light: #e9d5ff;
+            --hyprlnk-green: #10b981;
+            --hyprlnk-green-dark: #059669;
+            --hyprlnk-orange: #f97316;
+            --hyprlnk-orange-dark: #ea580c;
+            
+            /* Background Colors */
+            --hyprlnk-bg-light: #f8fafc;
+            --hyprlnk-bg-lighter: #f1f5f9;
+            
+            /* Glass Effect Colors */
+            --hyprlnk-glass-bg: rgba(255, 255, 255, 0.2);
+            --hyprlnk-glass-border: rgba(255, 255, 255, 0.3);
+            
+            /* Logo Gradient */
+            --hyprlnk-logo-gradient: linear-gradient(135deg, var(--hyprlnk-primary) 0%, var(--hyprlnk-primary-dark) 100%);
+        }
+        
         [x-cloak] { display: none !important; }
         .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--hyprlnk-logo-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         .hero-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--hyprlnk-logo-gradient);
         }
         .code-bg {
             background: linear-gradient(45deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -28,16 +58,24 @@
         .cursor {
             animation: terminal-cursor 1s infinite;
         }
+        
+        /* Modern Aero Glass Effect for Header */
+        .aero-glass {
+            background: var(--hyprlnk-glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+            border-bottom: 1px solid var(--hyprlnk-glass-border) !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50" x-data="{ showInstallSteps: false }">
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
+    <nav class="fixed top-0 w-full aero-glass z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <i class="fas fa-bookmark text-white text-sm"></i>
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: var(--hyprlnk-logo-gradient);">
+                        <i class="fas fa-link text-white text-sm"></i>
                     </div>
                     <span class="text-xl font-bold text-gray-900">HyprLnk</span>
                 </div>
@@ -45,9 +83,10 @@
                 <div class="flex items-center space-x-6">
                     <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
                     <a href="#setup" class="text-gray-600 hover:text-gray-900 transition-colors">Setup</a>
+                    <a href="./extension.html" class="text-gray-600 hover:text-gray-900 transition-colors">Extension</a>
                     <a href="./api-docs.html" class="text-gray-600 hover:text-gray-900 transition-colors">API</a>
                     <a href="#docs" class="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
-                    <a href="https://github.com/a-kar/HyprLnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+                    <a href="https://github.com/a-kar/hyprlnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
                         <i class="fab fa-github mr-2"></i>View on GitHub
                     </a>
                 </div>
@@ -60,19 +99,20 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                    <i class="fas fa-open-source-initiative mr-2"></i>
-                    Open Source • Self-Hosted • Privacy First
+                    <i class="fas fa-rocket mr-2"></i>
+                    Open Source • Self-Hosted • Privacy First • Lightning Fast
                 </div>
                 <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
                     Session management, <span class="gradient-text">reimagined</span>
                 </h1>
                 <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
-                    Self-hosted browser session and bookmark management that puts you in control. 
-                    Save and restore entire browsing sessions instantly. Built with Go, designed for homelabs, perfect for privacy-conscious developers.
+                    <strong>Save all your tabs. Restore them instantly. Replace your current tabs seamlessly.</strong><br>
+                    Self-hosted browser session and bookmark manager with a powerful extension that transforms how you work. 
+                    Never lose your workflow again.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                    <a href="https://github.com/a-kar/HyprLnk/releases" class="px-8 py-4 hero-gradient text-white rounded-xl text-lg font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                    <a href="https://github.com/a-kar/hyprlnk/releases" class="px-8 py-4 hero-gradient text-white rounded-xl text-lg font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center justify-center">
                         <i class="fas fa-download mr-2"></i>Download Latest
                     </a>
                     <button @click="showInstallSteps = true" class="px-8 py-4 bg-white border-2 border-gray-300 text-gray-900 rounded-xl text-lg font-semibold hover:border-gray-400 transition-all flex items-center justify-center">
@@ -82,10 +122,10 @@
                 
                 <!-- GitHub Stars Badge -->
                 <div class="flex justify-center space-x-4">
-                    <a href="https://github.com/a-kar/HyprLnk" class="inline-flex items-center bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <a href="https://github.com/a-kar/hyprlnk" class="inline-flex items-center bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                         <i class="fab fa-github mr-2"></i>
                         <span class="font-medium">Star on GitHub</span>
-                        <span class="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">⭐ 127</span>
+                        <span class="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">⭐ Star it!</span>
                     </a>
                 </div>
             </div>
@@ -106,7 +146,7 @@
                         <div class="mb-2">$ cd hyprlnk</div>
                         <div class="mb-2">$ docker-compose up -d</div>
                         <div class="mb-4 text-gray-400">✓ HyprLnk running at http://localhost:4381</div>
-                        <div class="text-blue-400">🚀 Ready to save and restore your browser sessions!<span class="cursor">_</span></div>
+                        <div class="text-blue-400">🚀 Ready to save sessions with lightning-fast performance!<span class="cursor">_</span></div>
                     </div>
                 </div>
             </div>
@@ -138,6 +178,220 @@
         </div>
     </section>
 
+    <!-- Extension Power Section -->
+    <section class="py-20 px-4 bg-gradient-to-br from-purple-50 to-blue-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                    <i class="fas fa-magic mr-2"></i>
+                    Browser Extension Power
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    Your browser, <span class="gradient-text">supercharged</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    The HyprLnk extension transforms your browser into a productivity powerhouse. 
+                    Save entire sessions, restore them instantly, and manage bookmarks without breaking your flow.
+                </p>
+            </div>
+
+            <!-- Key Benefits Grid -->
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <!-- Session Management -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100/70 rounded-2xl flex items-center justify-center mr-6">
+                            <i class="fas fa-window-restore text-purple-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Instant Session Recovery</h3>
+                            <p class="text-gray-600">Never lose your workflow again</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">One-Click Save:</span>
+                                <span class="text-gray-600"> Capture all open tabs instantly</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Smart Restore:</span>
+                                <span class="text-gray-600"> Replace current tabs or open in new window</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Session History:</span>
+                                <span class="text-gray-600"> Access past sessions anytime</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Cross-Device Sync:</span>
+                                <span class="text-gray-600"> Resume work on any machine</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Bookmark Management -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100/70 rounded-2xl flex items-center justify-center mr-6">
+                            <i class="fas fa-bookmark text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Smart Bookmarks</h3>
+                            <p class="text-gray-600">Organize without the hassle</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Quick Save:</span>
+                                <span class="text-gray-600"> Add bookmarks without leaving the page</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Auto-Tagging:</span>
+                                <span class="text-gray-600"> AI suggests relevant tags and categories</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Visual Collections:</span>
+                                <span class="text-gray-600"> See thumbnails and organize visually</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Fuzzy Search:</span>
+                                <span class="text-gray-600"> Find anything instantly, even with typos</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Workflow Examples -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Real-World Workflows</h3>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Research Sessions -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-green-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-microscope text-green-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Research Sessions</h4>
+                        <p class="text-gray-600 text-sm">
+                            Researching a topic? Save your entire research session with 20+ tabs. 
+                            Come back tomorrow and continue exactly where you left off.
+                        </p>
+                    </div>
+
+                    <!-- Project Context Switching -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-orange-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exchange-alt text-orange-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Context Switching</h4>
+                        <p class="text-gray-600 text-sm">
+                            Working on multiple projects? Save each project as a session. 
+                            Switch between them instantly without losing context.
+                        </p>
+                    </div>
+
+                    <!-- Daily Workflows -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-indigo-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calendar-check text-indigo-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Daily Workflows</h4>
+                        <p class="text-gray-600 text-sm">
+                            Start your day with your "Morning Routine" session - email, calendar, dashboards. 
+                            One click opens everything you need.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <a href="./extension.html" class="inline-flex items-center px-8 py-4 hero-gradient text-white rounded-xl text-lg font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1">
+                        <i class="fas fa-puzzle-piece mr-3"></i>
+                        Install Browser Extension
+                    </a>
+                </div>
+            </div>
+
+            <!-- Extension Features Comparison -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Why HyprLnk Extension?</h3>
+                
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-lg">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Feature</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">Browser Bookmarks</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">Session Managers</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900 bg-purple-50">HyprLnk</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">Save entire sessions</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center">✅</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">Smart bookmark organization</td>
+                                <td class="px-6 py-4 text-center">Basic</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">Replace current tabs</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center">Limited</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">Self-hosted & private</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">AI categorization</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center">❌</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">Cross-browser sync</td>
+                                <td class="px-6 py-4 text-center">Cloud only</td>
+                                <td class="px-6 py-4 text-center">Cloud only</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅ Self-hosted</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Features Section -->
     <section id="features" class="py-20 px-4">
         <div class="max-w-7xl mx-auto">
@@ -152,8 +406,8 @@
             
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Privacy First -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-green-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-shield-alt text-green-600 text-2xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">Privacy First</h3>
@@ -161,8 +415,8 @@
                 </div>
                 
                 <!-- Self-Hosted -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-blue-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-server text-blue-600 text-2xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">Self-Hosted</h3>
@@ -170,17 +424,17 @@
                 </div>
                 
                 <!-- Lightweight -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-purple-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-feather-alt text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Lightweight</h3>
-                    <p class="text-gray-600">Single binary, minimal dependencies, runs on 50MB RAM. Perfect for resource-constrained environments.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
+                    <p class="text-gray-600">Optimized storage engine with instant writes. Single binary, minimal dependencies, runs on 50MB RAM.</p>
                 </div>
                 
                 <!-- AI-Powered -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-orange-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-robot text-orange-600 text-2xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">AI Organization</h3>
@@ -188,8 +442,8 @@
                 </div>
                 
                 <!-- API First -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-indigo-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-code text-indigo-600 text-2xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">API First</h3>
@@ -197,8 +451,8 @@
                 </div>
                 
                 <!-- Docker & Portainer -->
-                <div class="group p-8 rounded-2xl border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all">
-                    <div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                    <div class="w-14 h-14 bg-cyan-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fab fa-docker text-cyan-600 text-2xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">Container Ready</h3>
@@ -231,7 +485,7 @@
                     </div>
                     <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
                         <div>git clone https://github.com/</div>
-                        <div>a-kar/HyprLnk.git</div>
+                        <div>a-kar/hyprlnk.git</div>
                         <div>docker-compose up -d</div>
                     </div>
                     <p class="text-gray-600 text-sm">Perfect for homelabs and development</p>
@@ -281,32 +535,32 @@
             </div>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <a href="#setup" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                    <div class="w-12 h-12 bg-blue-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-rocket text-blue-600"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">Quick Start</h3>
                     <p class="text-gray-600 text-sm">Get up and running in 5 minutes</p>
                 </a>
                 
-                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <a href="https://github.com/a-kar/hyprlnk#configuration" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                    <div class="w-12 h-12 bg-green-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-cog text-green-600"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">Configuration</h3>
                     <p class="text-gray-600 text-sm">Environment variables and settings</p>
                 </a>
                 
-                <a href="./api-docs.html" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <a href="./api-docs.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                    <div class="w-12 h-12 bg-purple-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-code text-purple-600"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">API Reference</h3>
                     <p class="text-gray-600 text-sm">RESTful API documentation</p>
                 </a>
                 
-                <a href="#" class="group bg-white rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all">
-                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <a href="./extension.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                    <div class="w-12 h-12 bg-orange-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-puzzle-piece text-orange-600"></i>
                     </div>
                     <h3 class="font-bold text-gray-900 mb-2">Extensions</h3>
@@ -325,7 +579,7 @@
             </p>
             
             <div class="grid md:grid-cols-3 gap-8">
-                <a href="https://github.com/a-kar/HyprLnk" class="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all">
+                <a href="https://github.com/a-kar/hyprlnk" class="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all">
                     <div class="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                         <i class="fab fa-github text-white text-2xl"></i>
                     </div>
@@ -333,15 +587,15 @@
                     <p class="text-gray-600">Star the repo, report issues, contribute code</p>
                 </a>
                 
-                <a href="#" class="group bg-blue-50 rounded-2xl p-8 hover:bg-blue-100 transition-all">
-                    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <div class="bg-blue-50 rounded-2xl p-8 opacity-75">
+                    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <i class="fab fa-discord text-white text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Discord</h3>
-                    <p class="text-gray-600">Chat with other users, get help, share tips</p>
-                </a>
+                    <p class="text-gray-600">Coming soon</p>
+                </div>
                 
-                <a href="#" class="group bg-orange-50 rounded-2xl p-8 hover:bg-orange-100 transition-all">
+                <a href="https://www.reddit.com/r/selfhosted/" class="group bg-orange-50 rounded-2xl p-8 hover:bg-orange-100 transition-all">
                     <div class="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                         <i class="fab fa-reddit text-white text-2xl"></i>
                     </div>
@@ -374,8 +628,8 @@
                         </h3>
                         <div class="bg-gray-900 rounded-lg p-4 font-mono text-green-400 text-sm mb-4">
                             <div class="mb-2"># Clone the repository</div>
-                            <div class="mb-2">git clone https://github.com/a-kar/HyprLnk.git</div>
-                            <div class="mb-2">cd HyprLnk</div>
+                            <div class="mb-2">git clone https://github.com/a-kar/hyprlnk.git</div>
+                            <div class="mb-2">cd hyprlnk</div>
                             <div class="mb-4"></div>
                             <div class="mb-2"># Start the services</div>
                             <div class="mb-2">docker-compose up -d</div>
@@ -401,7 +655,7 @@
                 </div>
                 
                 <div class="mt-8 flex justify-end">
-                    <a href="https://github.com/a-kar/HyprLnk" 
+                    <a href="https://github.com/a-kar/hyprlnk" 
                        class="px-6 py-3 hero-gradient text-white rounded-xl font-semibold hover:shadow-lg transition-all">
                         View Full Documentation
                     </a>
@@ -416,8 +670,8 @@
             <div class="grid md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i class="fas fa-bookmark text-white text-sm"></i>
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);">
+                            <i class="fas fa-link text-white text-sm"></i>
                         </div>
                         <span class="text-xl font-bold">HyprLnk</span>
                     </div>
@@ -427,30 +681,30 @@
                 <div>
                     <h4 class="font-bold text-white mb-4">Project</h4>
                     <ul class="space-y-2">
-                        <li><a href="https://github.com/a-kar/HyprLnk" class="text-gray-400 hover:text-white">GitHub</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Releases</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Roadmap</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Contributing</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk" class="text-gray-400 hover:text-white">GitHub</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk/releases" class="text-gray-400 hover:text-white">Releases</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk/issues" class="text-gray-400 hover:text-white">Roadmap</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk/blob/main/CONTRIBUTING.md" class="text-gray-400 hover:text-white">Contributing</a></li>
                     </ul>
                 </div>
                 
                 <div>
                     <h4 class="font-bold text-white mb-4">Documentation</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">Quick Start</a></li>
+                        <li><a href="#setup" class="text-gray-400 hover:text-white">Quick Start</a></li>
                         <li><a href="./api-docs.html" class="text-gray-400 hover:text-white">API Reference</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Configuration</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Extensions</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk#configuration" class="text-gray-400 hover:text-white">Configuration</a></li>
+                        <li><a href="./extension.html" class="text-gray-400 hover:text-white">Extensions</a></li>
                     </ul>
                 </div>
                 
                 <div>
                     <h4 class="font-bold text-white mb-4">Community</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">Discord</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">r/selfhosted</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Issues</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Discussions</a></li>
+                        <li><span class="text-gray-500">Discord (Coming Soon)</span></li>
+                        <li><a href="https://www.reddit.com/r/selfhosted/" class="text-gray-400 hover:text-white">r/selfhosted</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk/issues" class="text-gray-400 hover:text-white">Issues</a></li>
+                        <li><a href="https://github.com/a-kar/hyprlnk/discussions" class="text-gray-400 hover:text-white">Discussions</a></li>
                     </ul>
                 </div>
             </div>
@@ -458,13 +712,10 @@
             <div class="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-400 text-sm">© 2025 HyprLnk. Licensed under BSL 1.1 - see LICENSE for details.</p>
                 <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="https://github.com/a-kar/HyprLnk" class="text-gray-400 hover:text-white">
+                    <a href="https://github.com/a-kar/hyprlnk" class="text-gray-400 hover:text-white">
                         <i class="fab fa-github text-xl"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-white">
-                        <i class="fab fa-discord text-xl"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white">
+                    <a href="https://www.reddit.com/r/selfhosted/" class="text-gray-400 hover:text-white">
                         <i class="fab fa-reddit text-xl"></i>
                     </a>
                 </div>
