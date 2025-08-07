@@ -2,17 +2,16 @@ package repositories
 
 import (
     "fmt"
-    "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/storage"
 )
 
 type sessionRepository struct {
-    storage *storage.ParquetStorage
+    storage *storage.AppendLogStorage
 }
 
-func NewSessionRepository(storage *storage.ParquetStorage) SessionRepository {
+func NewSessionRepository(storage *storage.AppendLogStorage) SessionRepository {
     return &sessionRepository{storage: storage}
 }
 
@@ -36,50 +35,29 @@ func (r *sessionRepository) GetByID(id int64) (*models.Session, error) {
 }
 
 func (r *sessionRepository) Create(session *models.Session) error {
-    session.ID = time.Now().UnixNano()
-    session.CreatedAt = time.Now()
-    session.UpdatedAt = time.Now()
     session.IsActive = true
-
-    sessions, err := r.storage.ReadSessions()
-    if err != nil {
-        return err
-    }
-
-    sessions = append(sessions, *session)
-    return r.storage.WriteSessions(sessions)
+    return r.storage.AddSession(*session)
 }
 
 func (r *sessionRepository) Update(session *models.Session) error {
-    sessions, err := r.storage.ReadSessions()
+    // Check if session exists first
+    existing, err := r.GetByID(session.ID)
     if err != nil {
-        return err
+        return fmt.Errorf("session with ID %d not found", session.ID)
     }
-
-    for i, existing := range sessions {
-        if existing.ID == session.ID {
-            session.CreatedAt = existing.CreatedAt
-            session.UpdatedAt = time.Now()
-            sessions[i] = *session
-            return r.storage.WriteSessions(sessions)
-        }
-    }
-
-    return fmt.Errorf("session with ID %d not found", session.ID)
+    
+    // Preserve creation time
+    session.CreatedAt = existing.CreatedAt
+    
+    return r.storage.UpdateSession(*session)
 }
 
 func (r *sessionRepository) Delete(id int64) error {
-    sessions, err := r.storage.ReadSessions()
+    // Check if session exists first
+    _, err := r.GetByID(id)
     if err != nil {
-        return err
+        return fmt.Errorf("session with ID %d not found", id)
     }
-
-    for i, session := range sessions {
-        if session.ID == id {
-            sessions = append(sessions[:i], sessions[i+1:]...)
-            return r.storage.WriteSessions(sessions)
-        }
-    }
-
-    return fmt.Errorf("session with ID %d not found", id)
+    
+    return r.storage.DeleteSession(id)
 }

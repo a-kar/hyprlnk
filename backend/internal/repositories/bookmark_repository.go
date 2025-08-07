@@ -3,17 +3,16 @@ package repositories
 import (
     "fmt"
     "strings"
-    "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/storage"
 )
 
 type bookmarkRepository struct {
-    storage *storage.ParquetStorage
+    storage *storage.AppendLogStorage
 }
 
-func NewBookmarkRepository(storage *storage.ParquetStorage) BookmarkRepository {
+func NewBookmarkRepository(storage *storage.AppendLogStorage) BookmarkRepository {
     return &bookmarkRepository{storage: storage}
 }
 
@@ -37,51 +36,30 @@ func (r *bookmarkRepository) GetByID(id int64) (*models.Bookmark, error) {
 }
 
 func (r *bookmarkRepository) Create(bookmark *models.Bookmark) error {
-    bookmark.ID = time.Now().UnixNano()
-    bookmark.CreatedAt = time.Now()
-    bookmark.UpdatedAt = time.Now()
-
-    bookmarks, err := r.storage.ReadBookmarks()
-    if err != nil {
-        return err
-    }
-
-    bookmarks = append(bookmarks, *bookmark)
-    return r.storage.WriteBookmarks(bookmarks)
+    return r.storage.AddBookmark(*bookmark)
 }
 
 func (r *bookmarkRepository) Update(bookmark *models.Bookmark) error {
-    bookmarks, err := r.storage.ReadBookmarks()
+    // Check if bookmark exists first
+    existing, err := r.GetByID(bookmark.ID)
     if err != nil {
-        return err
+        return fmt.Errorf("bookmark with ID %d not found", bookmark.ID)
     }
-
-    for i, existing := range bookmarks {
-        if existing.ID == bookmark.ID {
-            bookmark.CreatedAt = existing.CreatedAt
-            bookmark.UpdatedAt = time.Now()
-            bookmarks[i] = *bookmark
-            return r.storage.WriteBookmarks(bookmarks)
-        }
-    }
-
-    return fmt.Errorf("bookmark with ID %d not found", bookmark.ID)
+    
+    // Preserve creation time
+    bookmark.CreatedAt = existing.CreatedAt
+    
+    return r.storage.UpdateBookmark(*bookmark)
 }
 
 func (r *bookmarkRepository) Delete(id int64) error {
-    bookmarks, err := r.storage.ReadBookmarks()
+    // Check if bookmark exists first
+    _, err := r.GetByID(id)
     if err != nil {
-        return err
+        return fmt.Errorf("bookmark with ID %d not found", id)
     }
-
-    for i, bookmark := range bookmarks {
-        if bookmark.ID == id {
-            bookmarks = append(bookmarks[:i], bookmarks[i+1:]...)
-            return r.storage.WriteBookmarks(bookmarks)
-        }
-    }
-
-    return fmt.Errorf("bookmark with ID %d not found", id)
+    
+    return r.storage.DeleteBookmark(id)
 }
 
 func (r *bookmarkRepository) Search(query string) ([]models.Bookmark, error) {

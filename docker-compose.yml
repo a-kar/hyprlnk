@@ -1,30 +1,29 @@
 version: '3.8'
 
 services:
-  hyprlink:
+  hyprlnk:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: hyprlink
+    container_name: hyprlnk
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     volumes:
-      - hyprlink_data:/app/data
+      - hyprlnk_data:/app/data
     environment:
       - PORT=8080
       - DATA_DIR=/app/data
     networks:
-      - hyprlink-network
+      - hyprlnk-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   frontend:
     image: nginx:alpine
-    container_name: hyprlink-frontend
+    container_name: hyprlnk-frontend
     restart: unless-stopped
     ports:
       - "4381:80"
@@ -32,14 +31,15 @@ services:
       - ./frontend/web:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
-      - hyprlink-network
+      - hyprlnk-network
     depends_on:
-      - hyprlink
+      hyprlnk:
+        condition: service_healthy
 
 volumes:
-  hyprlink_data:
+  hyprlnk_data:
     driver: local
 
 networks:
-  hyprlink-network:
+  hyprlnk-network:
     driver: bridge

@@ -5,8 +5,8 @@ import (
     "net/http"
     "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/services"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/services"
 )
 
 type LinkClickHandler struct {

@@ -4,8 +4,8 @@ import (
     "encoding/json"
     "net/http"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/services"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/services"
 )
 
 type HistoryHandler struct {

@@ -13,20 +13,24 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o hyprlnk .
 
 # Final stage
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates curl
-WORKDIR /root/
+WORKDIR /app
 
 # Copy the binary
-COPY --from=builder /app/main .
+COPY --from=builder /app/hyprlnk .
 
 # Create data directory
 RUN mkdir -p /app/data
 
+# Set environment variables
+ENV PORT=8080
+ENV DATA_DIR=/app/data
+
 EXPOSE 8080
 
-CMD ["./main"]
+CMD ["./hyprlnk"]

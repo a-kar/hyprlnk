@@ -11,13 +11,14 @@ import (
     "github.com/gorilla/mux"
     "github.com/rs/cors"
 
-    "hyprlink/internal/handlers"
-    "hyprlink/internal/repositories"
-    "hyprlink/internal/services"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/handlers"
+    "hyprlnk/internal/repositories"
+    "hyprlnk/internal/services"
+    "hyprlnk/internal/storage"
 )
 
 type App struct {
+    storage          *storage.AppendLogStorage
     bookmarkHandler   *handlers.BookmarkHandler
     sessionHandler    *handlers.SessionHandler
     historyHandler    *handlers.HistoryHandler
@@ -26,13 +27,13 @@ type App struct {
 }
 
 func NewApp(dataDir string) *App {
-    parquetStorage := storage.NewParquetStorage(dataDir)
+    appendLogStorage := storage.NewAppendLogStorage(dataDir)
 
-    bookmarkRepo := repositories.NewBookmarkRepository(parquetStorage)
-    sessionRepo := repositories.NewSessionRepository(parquetStorage)
-    historyRepo := repositories.NewHistoryRepository(parquetStorage)
-    linkClickRepo := repositories.NewLinkClickRepository(parquetStorage)
-    importRepo := repositories.NewImportRepository(parquetStorage)
+    bookmarkRepo := repositories.NewBookmarkRepository(appendLogStorage)
+    sessionRepo := repositories.NewSessionRepository(appendLogStorage)
+    historyRepo := repositories.NewHistoryRepository(appendLogStorage)
+    linkClickRepo := repositories.NewLinkClickRepository(appendLogStorage)
+    importRepo := repositories.NewImportRepository(appendLogStorage)
 
     hyprLinkService := services.NewHyprLinkService(
         bookmarkRepo,
@@ -43,6 +44,7 @@ func NewApp(dataDir string) *App {
     )
 
     return &App{
+        storage:          appendLogStorage,
         bookmarkHandler:  handlers.NewBookmarkHandler(hyprLinkService),
         sessionHandler:   handlers.NewSessionHandler(hyprLinkService),
         historyHandler:   handlers.NewHistoryHandler(hyprLinkService),
@@ -101,6 +103,14 @@ func main() {
     }
 
     app := NewApp(dataDir)
+    
+    // Ensure clean shutdown
+    defer func() {
+        if app.storage != nil {
+            app.storage.Close()
+        }
+    }()
+    
     router := app.setupRoutes()
 
     c := cors.New(cors.Options{

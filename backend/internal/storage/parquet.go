@@ -15,7 +15,7 @@ import (
     "github.com/apache/arrow/go/v14/parquet/file"
     "github.com/apache/arrow/go/v14/parquet/pqarrow"
 
-    "hyprlink/internal/models"
+    "hyprlnk/internal/models"
 )
 
 type ParquetStorage struct {

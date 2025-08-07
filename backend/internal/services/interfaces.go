@@ -1,6 +1,6 @@
 package services
 
-import "hyprlink/internal/models"
+import "hyprlnk/internal/models"
 
 type HyprLinkService interface {
     GetAllBookmarks() ([]models.Bookmark, error)

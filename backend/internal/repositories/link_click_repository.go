@@ -3,15 +3,15 @@ package repositories
 import (
     "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/storage"
 )
 
 type linkClickRepository struct {
-    storage *storage.ParquetStorage
+    storage *storage.AppendLogStorage
 }
 
-func NewLinkClickRepository(storage *storage.ParquetStorage) LinkClickRepository {
+func NewLinkClickRepository(storage *storage.AppendLogStorage) LinkClickRepository {
     return &linkClickRepository{storage: storage}
 }
 
@@ -20,32 +20,23 @@ func (r *linkClickRepository) GetAll() ([]models.LinkClick, error) {
 }
 
 func (r *linkClickRepository) Create(clicks []models.LinkClick) error {
+    // Use batch write for multiple clicks
     for i := range clicks {
-        clicks[i].ID = time.Now().UnixNano()
-        clicks[i].CreatedAt = time.Now()
+        if clicks[i].CreatedAt.IsZero() {
+            clicks[i].CreatedAt = time.Now()
+        }
     }
-
-    existingClicks, err := r.storage.ReadLinkClicks()
-    if err != nil {
-        return err
-    }
-
-    allClicks := append(existingClicks, clicks...)
-    return r.storage.WriteLinkClicks(allClicks)
+    return r.storage.WriteLinkClicks(clicks)
 }
 
 func (r *linkClickRepository) Sync(clicks []models.LinkClick) (int, error) {
+    // Use batch write for sync operation
     for i := range clicks {
-        clicks[i].ID = time.Now().UnixNano()
-        clicks[i].CreatedAt = time.Now()
+        if clicks[i].CreatedAt.IsZero() {
+            clicks[i].CreatedAt = time.Now()
+        }
     }
-
-    existingClicks, err := r.storage.ReadLinkClicks()
-    if err != nil {
-        return 0, err
-    }
-
-    allClicks := append(existingClicks, clicks...)
-    err = r.storage.WriteLinkClicks(allClicks)
+    
+    err := r.storage.WriteLinkClicks(clicks)
     return len(clicks), err
 }

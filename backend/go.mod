@@ -1,4 +1,4 @@
-module hyprlink
+module hyprlnk
 
 go 1.21
 

@@ -4,15 +4,15 @@ import (
     "fmt"
     "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/storage"
 )
 
 type importRepository struct {
-    storage *storage.ParquetStorage
+    storage *storage.AppendLogStorage
 }
 
-func NewImportRepository(storage *storage.ParquetStorage) ImportRepository {
+func NewImportRepository(storage *storage.AppendLogStorage) ImportRepository {
     return &importRepository{storage: storage}
 }
 

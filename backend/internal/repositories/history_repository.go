@@ -3,15 +3,15 @@ package repositories
 import (
     "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/storage"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/storage"
 )
 
 type historyRepository struct {
-    storage *storage.ParquetStorage
+    storage *storage.AppendLogStorage
 }
 
-func NewHistoryRepository(storage *storage.ParquetStorage) HistoryRepository {
+func NewHistoryRepository(storage *storage.AppendLogStorage) HistoryRepository {
     return &historyRepository{storage: storage}
 }
 

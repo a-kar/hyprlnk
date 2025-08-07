@@ -1,7 +1,7 @@
 package repositories
 
 import (
-    "hyprlink/internal/models"
+    "hyprlnk/internal/models"
 )
 
 type BookmarkRepository interface {

@@ -6,8 +6,8 @@ import (
     "strconv"
 
     "github.com/gorilla/mux"
-    "hyprlink/internal/models"
-    "hyprlink/internal/services"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/services"
 )
 
 type BookmarkHandler struct {

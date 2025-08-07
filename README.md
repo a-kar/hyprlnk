@@ -52,31 +52,31 @@ cd hyprlnk
 docker-compose up -d
 ```
 
-**Access Hyprlink:**
+**Access HyprLnk:**
 - 🌐 Web Interface: http://localhost:4381
 - 📊 API Health: http://localhost:8080/health
 
 ### 🏠 Homelab Setup with Portainer
 
-Perfect for self-hosting enthusiasts! Deploy Hyprlink in your homelab with just a few clicks.
+Perfect for self-hosting enthusiasts! Deploy HyprLnk in your homelab with just a few clicks.
 
 #### Method 1: Portainer Stacks (Recommended)
 
 1. **Open Portainer** → Go to **Stacks** → **Add Stack**
-2. **Name your stack**: `hyprlink`
+2. **Name your stack**: `hyprlnk`
 3. **Paste this Docker Compose configuration:**
 
 ```yaml
 version: '3.8'
 
 services:
-  hyprlink:
+  hyprlnk:
     build: ./backend
-    container_name: hyprlink-backend
+    container_name: hyprlnk-backend
     ports:
       - "8080:8080"
     volumes:
-      - hyprlink_data:/app/data
+      - hyprlnk_data:/app/data
     environment:
       - PORT=8080
     restart: unless-stopped
@@ -87,13 +87,13 @@ services:
       retries: 3
       start_period: 30s
 
-  hyprlink-frontend:
+  hyprlnk-frontend:
     build: ./frontend
-    container_name: hyprlink-frontend
+    container_name: hyprlnk-frontend
     ports:
       - "4381:80"
     depends_on:
-      - hyprlink
+      - hyprlnk
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
@@ -103,43 +103,43 @@ services:
       start_period: 10s
 
 volumes:
-  hyprlink_data:
+  hyprlnk_data:
     driver: local
 
 networks:
   default:
-    name: hyprlink-network
+    name: hyprlnk-network
 ```
 
 4. **Deploy the stack** and wait for containers to start
-5. **Access Hyprlink** at `http://YOUR_SERVER_IP:4381`
+5. **Access HyprLnk** at `http://YOUR_SERVER_IP:4381`
 
 #### Method 2: Docker Run Commands
 
 ```bash
 # Create network
-docker network create hyprlink-network
+docker network create hyprlnk-network
 
 # Create volume
-docker volume create hyprlink_data
+docker volume create hyprlnk_data
 
 # Run backend
 docker run -d \
-  --name hyprlink-backend \
-  --network hyprlink-network \
+  --name hyprlnk-backend \
+  --network hyprlnk-network \
   -p 8080:8080 \
-  -v hyprlink_data:/app/data \
+  -v hyprlnk_data:/app/data \
   -e PORT=8080 \
   --restart unless-stopped \
-  hyprlink-backend
+  hyprlnk-backend
 
 # Run frontend
 docker run -d \
-  --name hyprlink-frontend \
-  --network hyprlink-network \
+  --name hyprlnk-frontend \
+  --network hyprlnk-network \
   -p 4381:80 \
   --restart unless-stopped \
-  hyprlink-frontend
+  hyprlnk-frontend
 ```
 
 ### 🔧 Custom Port Configuration
@@ -149,7 +149,7 @@ docker run -d \
 Edit your `docker-compose.yml`:
 ```yaml
 services:
-  hyprlink-frontend:
+  hyprlnk-frontend:
     ports:
       - "YOUR_CUSTOM_PORT:80"  # e.g., "8080:80" for port 8080
 ```
@@ -160,7 +160,7 @@ services:
 
 ### Nginx Proxy Manager (Homelab Favorite)
 1. **Add Proxy Host** in Nginx Proxy Manager
-2. **Domain Names**: `hyprlink.yourdomain.com`
+2. **Domain Names**: `hyprlnk.yourdomain.com`
 3. **Forward Hostname/IP**: `YOUR_SERVER_IP`
 4. **Forward Port**: `4381`
 5. **Enable SSL** with Let's Encrypt
@@ -168,17 +168,17 @@ services:
 ### Traefik
 ```yaml
 services:
-  hyprlink-frontend:
+  hyprlnk-frontend:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hyprlink.rule=Host(`hyprlink.yourdomain.com`)"
-      - "traefik.http.routers.hyprlink.tls.certresolver=letsencrypt"
-      - "traefik.http.services.hyprlink.loadbalancer.server.port=80"
+      - "traefik.http.routers.hyprlnk.rule=Host(`hyprlnk.yourdomain.com`)"
+      - "traefik.http.routers.hyprlnk.tls.certresolver=letsencrypt"
+      - "traefik.http.services.hyprlnk.loadbalancer.server.port=80"
 ```
 
 ### Caddy
 ```caddy
-hyprlink.yourdomain.com {
+hyprlnk.yourdomain.com {
     reverse_proxy localhost:4381
 }
 ```
@@ -187,7 +187,7 @@ hyprlink.yourdomain.com {
 ```nginx
 server {
     listen 80;
-    server_name hyprlink.yourdomain.com;
+    server_name hyprlnk.yourdomain.com;
     
     location / {
         proxy_pass http://localhost:4381;

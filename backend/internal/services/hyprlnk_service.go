@@ -4,8 +4,8 @@ import (
     "strings"
     "time"
 
-    "hyprlink/internal/models"
-    "hyprlink/internal/repositories"
+    "hyprlnk/internal/models"
+    "hyprlnk/internal/repositories"
 )
 
 type hyprLinkService struct {
