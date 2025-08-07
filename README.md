@@ -8,6 +8,8 @@ Save browser sessions, track browsing history, and analyze your web activity wit
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![Go](https://img.shields.io/badge/go-1.21+-blue.svg)
 
+**[📖 Documentation](https://hyprlnk.app) • [🚀 Releases](https://github.com/a-kar/hyprlnk/releases) • [🐛 Issues](https://github.com/a-kar/hyprlnk/issues)**
+
 ## Features
 
 - **Session Management**: Save and restore entire browser sessions instantly
@@ -60,13 +62,7 @@ PORT=8080                    # Backend API port
 DATA_DIR=/app/data          # Storage directory
 ```
 
-Custom ports in `docker-compose.yml`:
-```yaml
-services:
-  frontend:
-    ports:
-      - "8080:80"  # Change 4381 to 8080
-```
+Runs on port 4381 by default.
 
 ## API Endpoints
 
