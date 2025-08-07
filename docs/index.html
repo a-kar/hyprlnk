@@ -83,7 +83,7 @@
                 <div class="flex items-center space-x-6">
                     <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
                     <a href="#setup" class="text-gray-600 hover:text-gray-900 transition-colors">Setup</a>
-                    <a href="./extension.html" class="text-gray-600 hover:text-gray-900 transition-colors">Extension</a>
+                    <a href="./extension.html" class="text-gray-600 hover:text-gray-900 transition-colors">Browser Setup</a>
                     <a href="./api-docs.html" class="text-gray-600 hover:text-gray-900 transition-colors">API</a>
                     <a href="#docs" class="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
                     <a href="https://github.com/a-kar/hyprlnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
@@ -99,16 +99,16 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                    <i class="fas fa-rocket mr-2"></i>
-                    Open Source • Self-Hosted • Privacy First • Lightning Fast
+                    <i class="fas fa-database mr-2"></i>
+                    Open Source • File-Based • Analytics Ready • Privacy First
                 </div>
                 <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
                     Session management, <span class="gradient-text">reimagined</span>
                 </h1>
                 <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
                     <strong>Save all your tabs. Restore them instantly. Replace your current tabs seamlessly.</strong><br>
-                    Self-hosted browser session and bookmark manager with a powerful extension that transforms how you work. 
-                    Never lose your workflow again.
+                    Self-hosted browser session and bookmark manager with simple file storage that's perfect for analytics. 
+                    Your data stays yours, in formats you can actually use.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -156,23 +156,27 @@
     <!-- Tech Stack -->
     <section class="py-20 px-4 bg-white">
         <div class="max-w-7xl mx-auto text-center">
-            <h2 class="text-3xl font-bold text-gray-900 mb-12">Built with modern tech stack</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-12">Built for self-hosters</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="flex flex-col items-center">
-                    <i class="fab fa-golang text-6xl text-blue-500 mb-4"></i>
-                    <span class="font-semibold text-gray-900">Go Backend</span>
-                </div>
                 <div class="flex flex-col items-center">
                     <i class="fab fa-docker text-6xl text-blue-600 mb-4"></i>
                     <span class="font-semibold text-gray-900">Docker Ready</span>
+                    <span class="text-sm text-gray-500 mt-1">One command deploy</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <i class="fas fa-database text-6xl text-green-600 mb-4"></i>
-                    <span class="font-semibold text-gray-900">Apache Parquet</span>
+                    <i class="fab fa-golang text-6xl text-green-600 mb-4"></i>
+                    <span class="font-semibold text-gray-900">Go Backend</span>
+                    <span class="text-sm text-gray-500 mt-1">Fast & lightweight</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <i class="fab fa-js-square text-6xl text-yellow-500 mb-4"></i>
-                    <span class="font-semibold text-gray-900">Alpine.js UI</span>
+                    <i class="fas fa-code text-6xl text-purple-600 mb-4"></i>
+                    <span class="font-semibold text-gray-900">HTMX + Alpine.js</span>
+                    <span class="text-sm text-gray-500 mt-1">Modern frontend</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-database text-6xl text-orange-600 mb-4"></i>
+                    <span class="font-semibold text-gray-900">File Storage</span>
+                    <span class="text-sm text-gray-500 mt-1">No database needed</span>
                 </div>
             </div>
         </div>
@@ -183,20 +187,20 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <div class="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                    <i class="fas fa-magic mr-2"></i>
-                    Browser Extension Power
+                    <i class="fas fa-link mr-2"></i>
+                    Webapp + Browser Integration
                 </div>
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Your browser, <span class="gradient-text">supercharged</span>
+                    Complete session <span class="gradient-text">management</span>
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    The HyprLnk extension transforms your browser into a productivity powerhouse. 
-                    Save entire sessions, restore them instantly, and manage bookmarks without breaking your flow.
+                    Save sessions in your browser, manage them in the webapp. HyprLnk combines a powerful web interface 
+                    with browser integration to give you complete control over your tabs, bookmarks, and browsing history.
                 </p>
             </div>
 
             <!-- Key Benefits Grid -->
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                 <!-- Session Management -->
                 <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                     <div class="flex items-center mb-6">
@@ -263,7 +267,7 @@
                             <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
                             <div>
                                 <span class="font-semibold text-gray-900">Auto-Tagging:</span>
-                                <span class="text-gray-600"> AI suggests relevant tags and categories</span>
+                                <span class="text-gray-600"> Intelligent tagging based on URL patterns and titles</span>
                             </div>
                         </li>
                         <li class="flex items-start">
@@ -282,13 +286,56 @@
                         </li>
                     </ul>
                 </div>
+
+                <!-- Browsing Analytics -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-orange-100/70 rounded-2xl flex items-center justify-center mr-6">
+                            <i class="fas fa-chart-line text-orange-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Browsing Analytics</h3>
+                            <p class="text-gray-600">Track and analyze your web activity</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">History Tracking:</span>
+                                <span class="text-gray-600"> View links from today, this week, month, or all time</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Link Click Tracking:</span>
+                                <span class="text-gray-600"> Build a complete navigation graph of your browsing</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Fuzzy Search:</span>
+                                <span class="text-gray-600"> Find any page you've visited, even with typos</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Smart Filters:</span>
+                                <span class="text-gray-600"> Filter by domain, date, visit count, and more</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Workflow Examples -->
             <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg">
                 <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Real-World Workflows</h3>
                 
-                <div class="grid md:grid-cols-3 gap-6">
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Research Sessions -->
                     <div class="text-center">
                         <div class="w-20 h-20 bg-green-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -324,12 +371,24 @@
                             One click opens everything you need.
                         </p>
                     </div>
+
+                    <!-- Browsing History Analysis -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-cyan-100/60 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-search text-cyan-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">History Analysis</h4>
+                        <p class="text-gray-600 text-sm">
+                            Need to find that article from last week? Use fuzzy search across all your history. 
+                            Filter by domain, date, or visit count to rediscover important resources.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="mt-8 text-center">
                     <a href="./extension.html" class="inline-flex items-center px-8 py-4 hero-gradient text-white rounded-xl text-lg font-semibold hover:shadow-xl transition-all transform hover:-translate-y-1">
-                        <i class="fas fa-puzzle-piece mr-3"></i>
-                        Install Browser Extension
+                        <i class="fas fa-rocket mr-3"></i>
+                        Setup Browser Integration
                     </a>
                 </div>
             </div>
@@ -374,10 +433,10 @@
                                 <td class="px-6 py-4 text-center bg-purple-50">✅</td>
                             </tr>
                             <tr>
-                                <td class="px-6 py-4 text-sm text-gray-900">AI categorization</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">Analytics-ready storage</td>
                                 <td class="px-6 py-4 text-center">❌</td>
                                 <td class="px-6 py-4 text-center">❌</td>
-                                <td class="px-6 py-4 text-center bg-purple-50">✅</td>
+                                <td class="px-6 py-4 text-center bg-purple-50">✅ Parquet</td>
                             </tr>
                             <tr>
                                 <td class="px-6 py-4 text-sm text-gray-900">Cross-browser sync</td>
@@ -392,6 +451,114 @@
         </div>
     </section>
 
+    <!-- Data & Analytics Section -->
+    <section class="py-20 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                    <i class="fas fa-database mr-2"></i>
+                    Own Your Data • Zero Vendor Lock-in • Analytics Ready
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    Your data stays yours
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Simple file storage with no complex database setup. Your browsing data is stored in standard formats 
+                    that you can backup, analyze, or migrate anywhere without vendor lock-in.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <!-- File-Based Storage -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100/70 rounded-2xl flex items-center justify-center mr-6">
+                            <i class="fas fa-file-code text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Zero Database Setup</h3>
+                            <p class="text-gray-600">Just files on disk</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">JSON + Parquet:</span>
+                                <span class="text-gray-600"> Fast JSON for operations, Parquet for analytics</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">No Database Setup:</span>
+                                <span class="text-gray-600"> Zero configuration, works out of the box</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Easy Backup:</span>
+                                <span class="text-gray-600"> Simple file copy, works with any backup solution</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Version Control:</span>
+                                <span class="text-gray-600"> Track changes with Git or any VCS</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Analytics Integration -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-green-100/70 rounded-2xl flex items-center justify-center mr-6">
+                            <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Own Your Analytics</h3>
+                            <p class="text-gray-600">Standard formats you can analyze</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Parquet Storage:</span>
+                                <span class="text-gray-600"> Internal columnar format perfect for analytics</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">BI Tool Compatible:</span>
+                                <span class="text-gray-600"> Works with Tableau, Power BI, Grafana, and more</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">Direct File Access:</span>
+                                <span class="text-gray-600"> Access parquet files directly with Python/Pandas</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <div>
+                                <span class="font-semibold text-gray-900">SQL Queries:</span>
+                                <span class="text-gray-600"> Query with DuckDB, ClickHouse, or any SQL engine</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <!-- Features Section -->
     <section id="features" class="py-20 px-4">
         <div class="max-w-7xl mx-auto">
@@ -400,13 +567,13 @@
                     Everything you need, nothing you don't
                 </h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Built for developers who care about privacy, performance, and simplicity.
+                    Built for developers who care about privacy, performance, and data ownership.
                 </p>
             </div>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Privacy First -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-green-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-shield-alt text-green-600 text-2xl"></i>
                     </div>
@@ -415,7 +582,7 @@
                 </div>
                 
                 <!-- Self-Hosted -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-blue-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-server text-blue-600 text-2xl"></i>
                     </div>
@@ -424,7 +591,7 @@
                 </div>
                 
                 <!-- Lightweight -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-purple-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-feather-alt text-purple-600 text-2xl"></i>
                     </div>
@@ -432,17 +599,17 @@
                     <p class="text-gray-600">Optimized storage engine with instant writes. Single binary, minimal dependencies, runs on 50MB RAM.</p>
                 </div>
                 
-                <!-- AI-Powered -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <!-- Analytics Ready -->
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-orange-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-robot text-orange-600 text-2xl"></i>
+                        <i class="fas fa-chart-bar text-orange-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">AI Organization</h3>
-                    <p class="text-gray-600">Optional AI categorization using local models or your preferred API. Always your choice.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Analytics Ready</h3>
+                    <p class="text-gray-600">Parquet storage format ideal for analytics. Query your browsing data with any BI tool or Python.</p>
                 </div>
                 
                 <!-- API First -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-indigo-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fas fa-code text-indigo-600 text-2xl"></i>
                     </div>
@@ -451,7 +618,7 @@
                 </div>
                 
                 <!-- Docker & Portainer -->
-                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-purple-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
+                <div class="group p-8 rounded-2xl border border-gray-200/60 bg-white/40 hover:border-indigo-300 hover:shadow-lg hover:bg-white/60 transition-all duration-300">
                     <div class="w-14 h-14 bg-cyan-100/70 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <i class="fab fa-docker text-cyan-600 text-2xl"></i>
                     </div>
@@ -531,11 +698,11 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Comprehensive Documentation</h2>
-                <p class="text-xl text-gray-600">Everything you need to get started and customize Hyprlink</p>
+                <p class="text-xl text-gray-600">Everything you need to get started and customize HyprLnk</p>
             </div>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <a href="#setup" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                <a href="#setup" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-indigo-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
                     <div class="w-12 h-12 bg-blue-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-rocket text-blue-600"></i>
                     </div>
@@ -543,7 +710,7 @@
                     <p class="text-gray-600 text-sm">Get up and running in 5 minutes</p>
                 </a>
                 
-                <a href="https://github.com/a-kar/hyprlnk#configuration" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                <a href="https://github.com/a-kar/hyprlnk#configuration" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-indigo-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
                     <div class="w-12 h-12 bg-green-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-cog text-green-600"></i>
                     </div>
@@ -551,7 +718,7 @@
                     <p class="text-gray-600 text-sm">Environment variables and settings</p>
                 </a>
                 
-                <a href="./api-docs.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                <a href="./api-docs.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-indigo-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
                     <div class="w-12 h-12 bg-purple-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-code text-purple-600"></i>
                     </div>
@@ -559,12 +726,12 @@
                     <p class="text-gray-600 text-sm">RESTful API documentation</p>
                 </a>
                 
-                <a href="./extension.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-purple-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
+                <a href="./extension.html" class="group bg-white/60 rounded-xl p-6 border border-gray-200/50 hover:border-indigo-300 hover:shadow-lg hover:bg-white/80 transition-all duration-300">
                     <div class="w-12 h-12 bg-orange-100/70 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <i class="fas fa-puzzle-piece text-orange-600"></i>
                     </div>
-                    <h3 class="font-bold text-gray-900 mb-2">Extensions</h3>
-                    <p class="text-gray-600 text-sm">Browser extension setup guide</p>
+                    <h3 class="font-bold text-gray-900 mb-2">Browser Setup</h3>
+                    <p class="text-gray-600 text-sm">Connect your browser to HyprLnk</p>
                 </a>
             </div>
         </div>
@@ -595,7 +762,7 @@
                     <p class="text-gray-600">Coming soon</p>
                 </div>
                 
-                <a href="https://www.reddit.com/r/selfhosted/" class="group bg-orange-50 rounded-2xl p-8 hover:bg-orange-100 transition-all">
+                <a href="https://www.reddit.com/r/selfhosted/" class="group bg-gray-50 rounded-2xl p-8 hover:bg-gray-100 transition-all">
                     <div class="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                         <i class="fab fa-reddit text-white text-2xl"></i>
                     </div>
@@ -675,7 +842,7 @@
                         </div>
                         <span class="text-xl font-bold">HyprLnk</span>
                     </div>
-                    <p class="text-gray-400">Self-hosted link management for developers who care about privacy.</p>
+                    <p class="text-gray-400">Self-hosted session management for developers who value privacy and data ownership.</p>
                 </div>
                 
                 <div>
@@ -694,7 +861,7 @@
                         <li><a href="#setup" class="text-gray-400 hover:text-white">Quick Start</a></li>
                         <li><a href="./api-docs.html" class="text-gray-400 hover:text-white">API Reference</a></li>
                         <li><a href="https://github.com/a-kar/hyprlnk#configuration" class="text-gray-400 hover:text-white">Configuration</a></li>
-                        <li><a href="./extension.html" class="text-gray-400 hover:text-white">Extensions</a></li>
+                        <li><a href="./extension.html" class="text-gray-400 hover:text-white">Browser Setup</a></li>
                     </ul>
                 </div>
                 
