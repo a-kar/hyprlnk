@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyprLnk API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* HyprLnk Color Palette */
+        :root {
+            /* Primary Brand Colors */
+            --hyprlnk-primary: #6366f1;
+            --hyprlnk-primary-dark: #4338ca;
+            --hyprlnk-primary-light: #eef2ff;
+            
+            /* Accent Colors */
+            --hyprlnk-blue: #3b82f6;
+            --hyprlnk-blue-dark: #1d4ed8;
+            --hyprlnk-purple: #8b5cf6;
+            --hyprlnk-purple-dark: #7c3aed;
+            --hyprlnk-purple-light: #e9d5ff;
+            --hyprlnk-green: #10b981;
+            --hyprlnk-green-dark: #059669;
+            --hyprlnk-orange: #f97316;
+            --hyprlnk-orange-dark: #ea580c;
+            
+            /* Background Colors */
+            --hyprlnk-bg-light: #f8fafc;
+            --hyprlnk-bg-lighter: #f1f5f9;
+            
+            /* Glass Effect Colors */
+            --hyprlnk-glass-bg: rgba(255, 255, 255, 0.2);
+            --hyprlnk-glass-border: rgba(255, 255, 255, 0.3);
+            
+            /* Logo Gradient */
+            --hyprlnk-logo-gradient: linear-gradient(135deg, var(--hyprlnk-primary) 0%, var(--hyprlnk-primary-dark) 100%);
+        }
+        [x-cloak] { display: none !important; }
+        .hero-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+        }
+        .code-block {
+            background: linear-gradient(45deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        .method-get { @apply bg-green-100 text-green-800; }
+        .method-post { @apply bg-blue-100 text-blue-800; }
+        .method-put { @apply bg-orange-100 text-orange-800; }
+        .method-delete { @apply bg-red-100 text-red-800; }
+        
+        pre { font-family: 'Fira Code', 'Monaco', 'Cascadia Code', monospace; }
+        .json-key { color: #e06c75; }
+        .json-string { color: #98c379; }
+        .json-number { color: #d19a66; }
+        .json-boolean { color: #56b6c2; }
+        
+        /* Modern Aero Glass Effect for Header */
+        .aero-glass {
+            background: var(--hyprlnk-glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+            border-bottom: 1px solid var(--hyprlnk-glass-border) !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="apiDocs()">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full aero-glass z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background: var(--hyprlnk-logo-gradient);">
+                        <i class="fas fa-link text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold text-gray-900">HyprLnk</span>
+                        <span class="text-sm text-gray-500 ml-2">API Documentation</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                        <span class="text-sm text-gray-600 px-3">Base URL:</span>
+                        <code class="bg-white px-3 py-1 rounded text-sm font-mono">http://localhost:4381/api</code>
+                    </div>
+                    <a href="./index.html" class="text-gray-600 hover:text-gray-900">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-16 flex">
+        <!-- Sidebar -->
+        <div class="w-80 bg-white border-r border-gray-200 h-screen sticky top-16 overflow-y-auto">
+            <div class="p-6">
+                <div class="mb-8">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Quick Start</h2>
+                    <ul class="space-y-2">
+                        <li><a href="#authentication" class="text-gray-600 hover:text-purple-600 text-sm">Authentication</a></li>
+                        <li><a href="#rate-limiting" class="text-gray-600 hover:text-purple-600 text-sm">Rate Limiting</a></li>
+                        <li><a href="#errors" class="text-gray-600 hover:text-purple-600 text-sm">Error Handling</a></li>
+                    </ul>
+                </div>
+                
+                <div class="mb-8">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Endpoints</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Bookmarks</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#get-bookmarks" class="text-sm text-gray-600 hover:text-purple-600">GET /bookmarks</a></li>
+                                <li><a href="#create-bookmark" class="text-sm text-gray-600 hover:text-purple-600">POST /bookmarks</a></li>
+                                <li><a href="#update-bookmark" class="text-sm text-gray-600 hover:text-purple-600">PUT /bookmarks/:id</a></li>
+                                <li><a href="#delete-bookmark" class="text-sm text-gray-600 hover:text-purple-600">DELETE /bookmarks/:id</a></li>
+                                <li><a href="#search-bookmarks" class="text-sm text-gray-600 hover:text-purple-600">GET /bookmarks/search</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Sessions</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#get-sessions" class="text-sm text-gray-600 hover:text-purple-600">GET /sessions</a></li>
+                                <li><a href="#create-session" class="text-sm text-gray-600 hover:text-purple-600">POST /sessions</a></li>
+                                <li><a href="#get-session" class="text-sm text-gray-600 hover:text-purple-600">GET /sessions/:id</a></li>
+                                <li><a href="#update-session" class="text-sm text-gray-600 hover:text-purple-600">PUT /sessions/:id</a></li>
+                                <li><a href="#delete-session" class="text-sm text-gray-600 hover:text-purple-600">DELETE /sessions/:id</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">History</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#get-history" class="text-sm text-gray-600 hover:text-purple-600">GET /history</a></li>
+                                <li><a href="#get-today-history" class="text-sm text-gray-600 hover:text-purple-600">GET /history/today</a></li>
+                                <li><a href="#get-week-history" class="text-sm text-gray-600 hover:text-purple-600">GET /history/week</a></li>
+                                <li><a href="#get-month-history" class="text-sm text-gray-600 hover:text-purple-600">GET /history/month</a></li>
+                                <li><a href="#get-history-count" class="text-sm text-gray-600 hover:text-purple-600">GET /history/count</a></li>
+                                <li><a href="#sync-history" class="text-sm text-gray-600 hover:text-purple-600">POST /history/sync</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Link Clicks</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#get-link-clicks" class="text-sm text-gray-600 hover:text-purple-600">GET /link-clicks</a></li>
+                                <li><a href="#sync-link-clicks" class="text-sm text-gray-600 hover:text-purple-600">POST /link-clicks/sync</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">Import</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#import-browser" class="text-sm text-gray-600 hover:text-purple-600">POST /import/browser</a></li>
+                                <li><a href="#segment-bookmarks" class="text-sm text-gray-600 hover:text-purple-600">POST /segment</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2">System</h3>
+                            <ul class="space-y-1 ml-3">
+                                <li><a href="#health" class="text-sm text-gray-600 hover:text-purple-600">GET /health</a></li>
+                                <li><a href="#ping" class="text-sm text-gray-600 hover:text-purple-600">GET /ping</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8 max-w-4xl">
+            <!-- Introduction -->
+            <div class="mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">HyprLnk API</h1>
+                <p class="text-xl text-gray-600 mb-6">
+                    RESTful API for managing bookmarks, sessions, and browsing history. 
+                    Built for developers who want to integrate HyprLnk with their tools and workflows.
+                </p>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold text-blue-900 mb-2">Getting Started</h3>
+                            <p class="text-blue-800 text-sm">
+                                The HyprLnk API is available at <code class="bg-blue-100 px-2 py-1 rounded">http://localhost:4381/api</code> 
+                                when running locally. All endpoints return JSON and follow REST conventions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication -->
+            <section id="authentication" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Authentication</h2>
+                <p class="text-gray-600 mb-6">
+                    Currently, HyprLnk API doesn't require authentication when running locally. 
+                    For production deployments, consider using a reverse proxy with authentication.
+                </p>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-1 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold text-yellow-900 mb-2">Security Note</h3>
+                            <p class="text-yellow-800 text-sm">
+                                When exposing the API publicly, always use HTTPS and consider implementing 
+                                API keys or OAuth for security.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Rate Limiting -->
+            <section id="rate-limiting" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Rate Limiting</h2>
+                <p class="text-gray-600 mb-4">
+                    The API currently doesn't implement rate limiting, but it's recommended for production deployments.
+                </p>
+            </section>
+
+            <!-- Error Handling -->
+            <section id="errors" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Error Handling</h2>
+                <p class="text-gray-600 mb-6">
+                    The API uses conventional HTTP response codes to indicate success or failure.
+                </p>
+                
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Code</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-green-600">200</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">OK - Request successful</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-green-600">201</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">Created - Resource created successfully</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-red-600">400</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">Bad Request - Invalid request parameters</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-red-600">404</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">Not Found - Resource doesn't exist</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-red-600">429</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">Too Many Requests - Rate limit exceeded</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-mono text-red-600">500</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">Internal Server Error - Server error</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Bookmarks API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">Bookmarks</h2>
+
+                <!-- Get Bookmarks -->
+                <div id="get-bookmarks" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/bookmarks</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Retrieve all bookmarks with optional filtering and pagination.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Query Parameters</h4>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <ul class="space-y-2">
+                            <li><code class="text-sm">limit</code> - Number of results (default: 50, max: 100)</li>
+                            <li><code class="text-sm">offset</code> - Pagination offset (default: 0)</li>
+                            <li><code class="text-sm">tag</code> - Filter by tag</li>
+                            <li><code class="text-sm">search</code> - Search in title, description, and URL</li>
+                            <li><code class="text-sm">sort</code> - Sort by: created_desc, created_asc, title_asc, title_desc</li>
+                        </ul>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Request</h4>
+                    <div class="code-block rounded-lg p-4 mb-4">
+                        <pre class="text-green-400 text-sm">curl -X GET "http://localhost:4381/api/bookmarks?limit=10&tag=development"</pre>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Response</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(bookmarksResponse)"></pre>
+                    </div>
+                </div>
+
+                <!-- Create Bookmark -->
+                <div id="create-bookmark" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/bookmarks</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Create a new bookmark.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Request Body</h4>
+                    <div class="code-block rounded-lg p-4 mb-4">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(createBookmarkRequest)"></pre>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Response</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(createBookmarkResponse)"></pre>
+                    </div>
+                </div>
+
+                <!-- Search Bookmarks -->
+                <div id="search-bookmarks" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/bookmarks/search</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Search bookmarks with query parameters.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Query Parameters</h4>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <ul class="space-y-2">
+                            <li><code class="text-sm">q</code> - Search query string</li>
+                            <li><code class="text-sm">limit</code> - Number of results (default: 50)</li>
+                        </ul>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Request</h4>
+                    <div class="code-block rounded-lg p-4 mb-4">
+                        <pre class="text-green-400 text-sm">curl -X GET "http://localhost:4381/api/bookmarks/search?q=javascript&limit=10"</pre>
+                    </div>
+                </div>
+
+                <!-- Update Bookmark -->
+                <div id="update-bookmark" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-put px-3 py-1 rounded-full text-sm font-semibold mr-3">PUT</span>
+                        <code class="text-lg font-mono">/bookmarks/:id</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Update an existing bookmark.</p>
+                </div>
+
+                <!-- Delete Bookmark -->
+                <div id="delete-bookmark" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-delete px-3 py-1 rounded-full text-sm font-semibold mr-3">DELETE</span>
+                        <code class="text-lg font-mono">/bookmarks/:id</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Delete a bookmark.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Request</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-green-400 text-sm">curl -X DELETE "http://localhost:4381/api/bookmarks/123"</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sessions API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">Sessions</h2>
+
+                <!-- Get Sessions -->
+                <div id="get-sessions" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/sessions</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Retrieve all browser sessions.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Response</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(sessionsResponse)"></pre>
+                    </div>
+                </div>
+
+                <!-- Create Session -->
+                <div id="create-session" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/sessions</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Create a new browser session.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Request Body</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(createSessionRequest)"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">History</h2>
+
+                <!-- Get History -->
+                <div id="get-history" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/history</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Retrieve browsing history.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Query Parameters</h4>
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <ul class="space-y-2">
+                            <li><code class="text-sm">limit</code> - Number of results (default: 50)</li>
+                            <li><code class="text-sm">date</code> - Filter by date (YYYY-MM-DD)</li>
+                            <li><code class="text-sm">search</code> - Search in title and URL</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Today's History -->
+                <div id="get-today-history" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/history/today</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Retrieve today's browsing history.</p>
+                </div>
+                
+                <!-- Week History -->
+                <div id="get-week-history" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/history/week</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Retrieve this week's browsing history.</p>
+                </div>
+                
+                <!-- Month History -->
+                <div id="get-month-history" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/history/month</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Retrieve this month's browsing history.</p>
+                </div>
+                
+                <!-- History Count -->
+                <div id="get-history-count" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/history/count</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Get count of history entries.</p>
+                </div>
+                
+                <!-- Sync History -->
+                <div id="sync-history" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/history/sync</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Sync browsing history data.</p>
+                </div>
+            </section>
+
+            <!-- Link Clicks API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">Link Clicks</h2>
+
+                <div id="get-link-clicks" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/link-clicks</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Retrieve all link click tracking data.</p>
+                </div>
+                
+                <div id="sync-link-clicks" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/link-clicks/sync</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Sync link click data from browser extension.</p>
+                </div>
+            </section>
+            
+            <!-- Import API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">Import</h2>
+
+                <div id="import-browser" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/import/browser</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Import bookmarks and data from browser export files.</p>
+                </div>
+                
+                <div id="segment-bookmarks" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-post px-3 py-1 rounded-full text-sm font-semibold mr-3">POST</span>
+                        <code class="text-lg font-mono">/segment</code>
+                    </div>
+                    <p class="text-gray-600 mb-6">Bulk segment and categorize bookmarks using AI.</p>
+                </div>
+            </section>
+
+            <!-- System API -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">System</h2>
+
+                <!-- Health Check -->
+                <div id="health" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/health</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Health check endpoint for monitoring.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Response</h4>
+                    <div class="code-block rounded-lg p-4 mb-6">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(healthResponse)"></pre>
+                    </div>
+                </div>
+
+                <!-- Ping -->
+                <div id="ping" class="mb-8">
+                    <div class="flex items-center mb-4">
+                        <span class="method-get px-3 py-1 rounded-full text-sm font-semibold mr-3">GET</span>
+                        <code class="text-lg font-mono">/ping</code>
+                    </div>
+                    <p class="text-gray-600 mb-4">Ping endpoint with timestamp for connectivity testing.</p>
+                    
+                    <h4 class="font-semibold text-gray-900 mb-3">Example Response</h4>
+                    <div class="code-block rounded-lg p-4 mb-8">
+                        <pre class="text-gray-300 text-sm" x-html="formatJson(pingResponse)"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SDKs and Examples -->
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8">SDKs & Examples</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- JavaScript Example -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fab fa-js-square text-yellow-500 mr-3 text-xl"></i>
+                            JavaScript
+                        </h3>
+                        <div class="code-block rounded-lg p-4">
+                            <pre class="text-gray-300 text-sm">// Create a bookmark
+const response = await fetch('/api/bookmarks', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://example.com',
+    title: 'Example Site',
+    tags: ['web', 'example']
+  })
+});
+
+const bookmark = await response.json();</pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Python Example -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6">
+                        <h3 class="font-bold text-gray-900 mb-4 flex items-center">
+                            <i class="fab fa-python text-blue-500 mr-3 text-xl"></i>
+                            Python
+                        </h3>
+                        <div class="code-block rounded-lg p-4">
+                            <pre class="text-gray-300 text-sm">import requests
+
+# Create a bookmark
+response = requests.post(
+    'http://localhost:4381/api/bookmarks',
+    json={
+        'url': 'https://example.com',
+        'title': 'Example Site',
+        'tags': ['web', 'example']
+    }
+)
+
+bookmark = response.json()</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function apiDocs() {
+            return {
+                bookmarksResponse: {
+                    data: [
+                        {
+                            id: "123",
+                            url: "https://example.com",
+                            title: "Example Website",
+                            description: "A great example website",
+                            tags: ["web", "example"],
+                            created_at: "2024-01-15T10:30:00Z",
+                            updated_at: "2024-01-15T10:30:00Z"
+                        }
+                    ],
+                    meta: {
+                        total: 1,
+                        limit: 50,
+                        offset: 0
+                    }
+                },
+                
+                createBookmarkRequest: {
+                    url: "https://example.com",
+                    title: "Example Website",
+                    description: "A great example website",
+                    tags: ["web", "example"]
+                },
+                
+                createBookmarkResponse: {
+                    id: "123",
+                    url: "https://example.com",
+                    title: "Example Website",
+                    description: "A great example website",
+                    tags: ["web", "example"],
+                    created_at: "2024-01-15T10:30:00Z",
+                    updated_at: "2024-01-15T10:30:00Z"
+                },
+                
+                sessionsResponse: {
+                    data: [
+                        {
+                            id: "456",
+                            name: "Development Session",
+                            description: "Work on the new feature",
+                            tabs: [
+                                {
+                                    url: "https://github.com",
+                                    title: "GitHub",
+                                    active: true,
+                                    index: 0
+                                }
+                            ],
+                            is_active: true,
+                            created_at: "2024-01-15T10:30:00Z"
+                        }
+                    ]
+                },
+                
+                createSessionRequest: {
+                    name: "Development Session",
+                    description: "Work on the new feature",
+                    tabs: [
+                        {
+                            url: "https://github.com",
+                            title: "GitHub",
+                            active: true,
+                            index: 0
+                        }
+                    ],
+                    is_active: true
+                },
+                
+                healthResponse: {
+                    status: "healthy"
+                },
+                
+                pingResponse: {
+                    status: "ok",
+                    timestamp: "2024-01-15T10:30:00Z"
+                },
+
+                formatJson(obj) {
+                    return JSON.stringify(obj, null, 2)
+                        .replace(/("[\w_]+"):/g, '<span class="json-key">$1</span>:')
+                        .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+                        .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+                        .replace(/: (true|false|null)/g, ': <span class="json-boolean">$1</span>');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

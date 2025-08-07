@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyprLnk Browser Extension - Installation Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* HyprLnk Color Palette */
+        :root {
+            /* Primary Brand Colors */
+            --hyprlnk-primary: #6366f1;
+            --hyprlnk-primary-dark: #4338ca;
+            --hyprlnk-primary-light: #eef2ff;
+            
+            /* Accent Colors */
+            --hyprlnk-blue: #3b82f6;
+            --hyprlnk-blue-dark: #1d4ed8;
+            --hyprlnk-purple: #8b5cf6;
+            --hyprlnk-purple-dark: #7c3aed;
+            --hyprlnk-purple-light: #e9d5ff;
+            --hyprlnk-green: #10b981;
+            --hyprlnk-green-dark: #059669;
+            --hyprlnk-orange: #f97316;
+            --hyprlnk-orange-dark: #ea580c;
+            
+            /* Background Colors */
+            --hyprlnk-bg-light: #f8fafc;
+            --hyprlnk-bg-lighter: #f1f5f9;
+            
+            /* Glass Effect Colors */
+            --hyprlnk-glass-bg: rgba(255, 255, 255, 0.2);
+            --hyprlnk-glass-border: rgba(255, 255, 255, 0.3);
+            
+            /* Logo Gradient */
+            --hyprlnk-logo-gradient: linear-gradient(135deg, var(--hyprlnk-primary) 0%, var(--hyprlnk-primary-dark) 100%);
+        }
+        .hero-gradient {
+            background: var(--hyprlnk-logo-gradient);
+        }
+        .code-bg {
+            background: linear-gradient(45deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        
+        /* Modern Aero Glass Effect for Header */
+        .aero-glass {
+            background: var(--hyprlnk-glass-bg) !important;
+            backdrop-filter: blur(16px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+            border-bottom: 1px solid var(--hyprlnk-glass-border) !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full aero-glass z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg hero-gradient">
+                        <i class="fas fa-link text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">HyprLnk</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="./index.html" class="text-gray-600 hover:text-gray-900">← Back to Home</a>
+                    <a href="./api-docs.html" class="text-gray-600 hover:text-gray-900">API Docs</a>
+                    <a href="https://github.com/a-kar/hyprlnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <i class="fas fa-puzzle-piece mr-2"></i>
+                Browser Extension
+            </div>
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                HyprLnk Browser Extension
+            </h1>
+            <p class="text-xl text-gray-600 mb-8">
+                Save bookmarks, capture sessions, and track your browsing history directly from your browser
+            </p>
+        </div>
+    </section>
+
+    <!-- Installation Options -->
+    <section class="py-12 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Installation Methods</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Chrome/Edge -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all">
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fab fa-chrome text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Chrome / Edge</h3>
+                            <span class="text-sm text-gray-500">Chromium-based browsers</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Google Chrome 88+</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Microsoft Edge 88+</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Brave Browser</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Opera / Vivaldi</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showChromeInstructions()" 
+                            class="w-full px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Install for Chrome/Edge
+                    </button>
+                </div>
+
+                <!-- Firefox -->
+                <div class="bg-white rounded-2xl p-8 border border-gray-200 hover:shadow-xl transition-all">
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fab fa-firefox-browser text-orange-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Firefox</h3>
+                            <span class="text-sm text-gray-500">Mozilla Firefox</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Firefox 109+</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Firefox Developer Edition</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span class="text-gray-700">Firefox ESR</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-yellow-500 mr-2 mt-1">⚠</span>
+                            <span class="text-gray-700">Requires manifest v2 conversion</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showFirefoxInstructions()" 
+                            class="w-full px-6 py-3 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Install for Firefox
+                    </button>
+                </div>
+            </div>
+
+            <!-- Developer Installation -->
+            <div id="installation-instructions" class="bg-white rounded-2xl p-8 border border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-code text-purple-600 mr-3"></i>Developer Installation
+                </h3>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-yellow-600 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-semibold text-yellow-900 mb-2">Extension Not Yet Published</h4>
+                            <p class="text-yellow-800 text-sm">
+                                The HyprLnk extension is currently in development and not yet available on the Chrome Web Store or Firefox Add-ons. 
+                                You can install it manually using developer mode.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chrome Instructions -->
+                <div id="chrome-instructions" class="space-y-6">
+                    <h4 class="text-xl font-bold text-gray-900">Chrome/Edge Installation Steps:</h4>
+                    
+                    <ol class="space-y-4">
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">1</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Download the Extension</p>
+                                <p class="text-gray-600 text-sm mt-1">Clone or download the HyprLnk repository from GitHub</p>
+                                <div class="code-bg rounded-lg p-3 mt-2">
+                                    <code class="text-green-400 text-sm">git clone https://github.com/a-kar/hyprlnk.git</code>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">2</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Open Extension Management</p>
+                                <p class="text-gray-600 text-sm mt-1">Navigate to chrome://extensions/ (or edge://extensions/ for Edge)</p>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">3</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Enable Developer Mode</p>
+                                <p class="text-gray-600 text-sm mt-1">Toggle the "Developer mode" switch in the top right corner</p>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">4</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Load the Extension</p>
+                                <p class="text-gray-600 text-sm mt-1">Click "Load unpacked" and select the <code class="bg-gray-100 px-2 py-1 rounded">frontend/extension</code> folder</p>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-4">5</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Configure HyprLnk Server</p>
+                                <p class="text-gray-600 text-sm mt-1">Make sure HyprLnk is running on <code class="bg-gray-100 px-2 py-1 rounded">http://localhost:4381</code></p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Firefox Instructions (hidden by default) -->
+                <div id="firefox-instructions" class="space-y-6 hidden">
+                    <h4 class="text-xl font-bold text-gray-900">Firefox Installation Steps:</h4>
+                    
+                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-6">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-orange-600 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-orange-900 mb-2">Manifest V2 Required</h4>
+                                <p class="text-orange-800 text-sm">
+                                    Firefox requires Manifest V2. You'll need to convert the manifest.json file or wait for the Firefox-specific version.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <ol class="space-y-4">
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold mr-4">1</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Open Firefox Debugging</p>
+                                <p class="text-gray-600 text-sm mt-1">Navigate to about:debugging</p>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold mr-4">2</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Click "This Firefox"</p>
+                                <p class="text-gray-600 text-sm mt-1">Select "This Firefox" from the left sidebar</p>
+                            </div>
+                        </li>
+                        
+                        <li class="flex">
+                            <span class="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold mr-4">3</span>
+                            <div>
+                                <p class="font-semibold text-gray-900">Load Temporary Add-on</p>
+                                <p class="text-gray-600 text-sm mt-1">Click "Load Temporary Add-on" and select the manifest.json file</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Extension Features</h3>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-bookmark text-blue-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Quick Save</h4>
+                        <p class="text-gray-600 text-sm">Save any page as a bookmark with one click</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-window-restore text-purple-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Session Capture</h4>
+                        <p class="text-gray-600 text-sm">Save all open tabs as a session for later</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-history text-green-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">History Sync</h4>
+                        <p class="text-gray-600 text-sm">Automatically sync browsing history to HyprLnk</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-mouse-pointer text-orange-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Link Tracking</h4>
+                        <p class="text-gray-600 text-sm">Track clicked links for better organization</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-sync text-indigo-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Real-time Sync</h4>
+                        <p class="text-gray-600 text-sm">Changes sync instantly with your HyprLnk server</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-6 border border-gray-200">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                            <i class="fas fa-tags text-red-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Smart Tags</h4>
+                        <p class="text-gray-600 text-sm">Add tags and categories while browsing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 mt-20">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400">© 2025 HyprLnk. Licensed under BSL 1.1</p>
+            <div class="mt-4">
+                <a href="https://github.com/a-kar/hyprlnk" class="text-gray-400 hover:text-white mx-3">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function showChromeInstructions() {
+            document.getElementById('chrome-instructions').classList.remove('hidden');
+            document.getElementById('firefox-instructions').classList.add('hidden');
+            document.getElementById('installation-instructions').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showFirefoxInstructions() {
+            document.getElementById('firefox-instructions').classList.remove('hidden');
+            document.getElementById('chrome-instructions').classList.add('hidden');
+            document.getElementById('installation-instructions').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
