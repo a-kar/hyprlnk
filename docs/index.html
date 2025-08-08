@@ -68,7 +68,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50" x-data="{ showInstallSteps: false }">
+<body class="bg-gray-50" x-data="{ showInstallSteps: false, mobileMenuOpen: false }">
     <!-- Navigation -->
     <nav class="fixed top-0 w-full aero-glass z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,13 +80,36 @@
                     <span class="text-xl font-bold text-gray-900">HyprLnk</span>
                 </div>
                 
-                <div class="flex items-center space-x-6">
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
                     <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
                     <a href="#setup" class="text-gray-600 hover:text-gray-900 transition-colors">Setup</a>
                     <a href="./extension.html" class="text-gray-600 hover:text-gray-900 transition-colors">Browser Setup</a>
                     <a href="./api-docs.html" class="text-gray-600 hover:text-gray-900 transition-colors">API</a>
                     <a href="#docs" class="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
                     <a href="https://github.com/a-kar/hyprlnk" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+                        <i class="fab fa-github mr-2"></i>View on GitHub
+                    </a>
+                </div>
+                
+                <!-- Mobile Hamburger -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div x-show="mobileMenuOpen" x-cloak x-transition class="md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 bg-white/90 backdrop-blur-md rounded-lg mt-2 border border-gray-200">
+                    <a href="#features" @click="mobileMenuOpen = false" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Features</a>
+                    <a href="#setup" @click="mobileMenuOpen = false" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Setup</a>
+                    <a href="./extension.html" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Browser Setup</a>
+                    <a href="./api-docs.html" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">API</a>
+                    <a href="#docs" @click="mobileMenuOpen = false" class="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">Docs</a>
+                    <a href="https://github.com/a-kar/hyprlnk" class="block px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors text-center">
                         <i class="fab fa-github mr-2"></i>View on GitHub
                     </a>
                 </div>
