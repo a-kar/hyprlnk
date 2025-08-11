@@ -688,8 +688,14 @@ func (als *AppendLogStorage) compactHistory() error {
 	als.mutex.Lock()
 	defer als.mutex.Unlock()
 	
-	// Read all history (no deduplication needed)
-	allHistory, _ := als.ReadHistory()
+	// Read all history directly (already have lock, no deduplication needed)
+	mainHistory, err := als.parquetStorage.ReadHistory()
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read main history: %w", err)
+	}
+	
+	// Append delta buffer (no deduplication needed for history)
+	allHistory := append(mainHistory, als.historyDeltaBuffer...)
 	
 	// Write new main Parquet file
 	if err := als.parquetStorage.WriteHistory(allHistory); err != nil {
@@ -708,8 +714,14 @@ func (als *AppendLogStorage) compactLinkClicks() error {
 	als.mutex.Lock()
 	defer als.mutex.Unlock()
 	
-	// Read all link clicks (no deduplication needed)
-	allClicks, _ := als.ReadLinkClicks()
+	// Read all link clicks directly (already have lock, no deduplication needed)
+	mainClicks, err := als.parquetStorage.ReadLinkClicks()
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to read main link clicks: %w", err)
+	}
+	
+	// Append delta buffer (no deduplication needed for link clicks)
+	allClicks := append(mainClicks, als.linkClickDeltaBuffer...)
 	
 	// Write new main Parquet file
 	if err := als.parquetStorage.WriteLinkClicks(allClicks); err != nil {

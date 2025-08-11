@@ -1,5 +1,5 @@
 const API_BASE = 'http://localhost:4381/api';
-const DEBUG_MODE = true; // Set to true for development logging - shows URL tracking and sync events
+const DEBUG_MODE = false; // Set to true for development logging - shows URL tracking and sync events
 
 // Debug logging helper
 function debugLog(message, ...args) {
